@@ -38,14 +38,34 @@ model_path = os.path.join(MODEL_DIR, 'final_model3_top10.pkl')
 encoder_path = os.path.join(MODEL_DIR, 'encoders_dict.pkl')
 features_path = os.path.join(MODEL_DIR, 'top_10_features2.pkl')
 
-# Load the model and files
-model = joblib.load(model_path)
-encoders = joblib.load(encoder_path)
-top_10_features = list(joblib.load(features_path))
+# Lazy load models to save memory
+model = None
+encoders = None
+top_10_features = None
+
+def load_models():
+    global model, encoders, top_10_features
+    if model is None:
+        try:
+            model = joblib.load(model_path)
+            encoders = joblib.load(encoder_path)
+            top_10_features = list(joblib.load(features_path))
+        except Exception as e:
+            logger.error(f"Error loading ML models: {str(e)}")
+            # Fallback values
+            top_10_features = ['Commodity', 'Region', 'Market', 'Month', 'Year']
+            encoders = {}
+            model = None
 
 def get_dropdown_options():
+    # Load models if not already loaded
+    load_models()
+    
     # Always include all top_10_features, even if not in encoders (use empty list if missing)
-    options = {feature: list(encoders[feature].classes_) if feature in encoders else [] for feature in top_10_features}
+    if top_10_features and encoders:
+        options = {feature: list(encoders[feature].classes_) if feature in encoders else [] for feature in top_10_features}
+    else:
+        options = {}
     
     # Add commodity category options
     options['commodity_category'] = [
@@ -292,6 +312,18 @@ def chatbot_api(request):
 def make_prediction(request):
     if request.method == 'POST':
         try:
+            # Load models if not already loaded
+            load_models()
+            
+            # Check if models loaded successfully
+            if model is None:
+                messages.error(request, "Prediction service is temporarily unavailable. Please try again later.")
+                return render(request, 'food5.html', {
+                    'form_data': request.POST,
+                    'top_6_features': top_10_features or [],
+                    'dropdown_options': get_dropdown_options(),
+                })
+            
             # Get form data
             form_data = {}
             features = []
@@ -307,7 +339,7 @@ def make_prediction(request):
                     index = top_10_features.index(feature_name)
                     features[index] = encoder.transform([features[index]])[0]
 
-            # Make prediction
+            # Make prediction with timeout protection
             features = np.array(features).reshape(1, -1)
             log_price = model.predict(features)[0]
             actual_price = round(float(np.exp(log_price)), 2)
@@ -337,32 +369,31 @@ def make_prediction(request):
             Food Price Predictor Team
             """
 
-            # Send email notification
+            # Send email notification (optional)
             try:
-                send_mail(
-                    'Your Food Price Prediction Result',
-                    email_message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [request.user.email],
-                    fail_silently=False,
-                )
-                logger.info(f"Prediction email sent successfully to {request.user.email}")
+                if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
+                    send_mail(
+                        'Your Food Price Prediction Result',
+                        email_message,
+                        settings.DEFAULT_FROM_EMAIL,
+                        [request.user.email],
+                        fail_silently=True,
+                    )
+                    logger.info(f"Prediction email sent successfully to {request.user.email}")
             except Exception as e:
                 logger.error(f"Error sending prediction email: {str(e)}")
-                logger.error(f"Error type: {type(e).__name__}")
-                logger.error(f"Traceback: {traceback.format_exc()}")
 
-            # Send SMS notification if user has phone number
-            if request.user.phone_number:
-                logger.info(f"User has phone number: {request.user.phone_number}")
-                sms_message = f"Your food price prediction result: KES {actual_price:.2f}"
-                success, message = send_sms(request.user.phone_number, sms_message)
-                if success:
-                    logger.info("Prediction SMS sent successfully")
-                else:
-                    logger.error(f"Prediction SMS sending failed: {message}")
-            else:
-                logger.warning("User has no phone number configured")
+            # Send SMS notification if user has phone number (optional)
+            try:
+                if request.user.phone_number and settings.TWILIO_ACCOUNT_SID:
+                    sms_message = f"Your food price prediction result: KES {actual_price:.2f}"
+                    success, message = send_sms(request.user.phone_number, sms_message)
+                    if success:
+                        logger.info("Prediction SMS sent successfully")
+                    else:
+                        logger.error(f"Prediction SMS sending failed: {message}")
+            except Exception as e:
+                logger.error(f"Error sending SMS: {str(e)}")
 
             # Instead of redirecting to a result page, render the form with the prediction and previous values
             return render(request, 'food5.html', {
@@ -383,9 +414,10 @@ def make_prediction(request):
                 'dropdown_options': {feature: list(encoders[feature].classes_) for feature in top_10_features if feature in encoders},
             })
     # GET request
+    load_models()  # Ensure models are loaded
     return render(request, 'food5.html', {
-        'top_6_features': top_10_features,
-        'dropdown_options': {feature: list(encoders[feature].classes_) for feature in top_10_features if feature in encoders},
+        'top_6_features': top_10_features or [],
+        'dropdown_options': get_dropdown_options(),
     })
 
 @login_required
