@@ -17,8 +17,8 @@ services:
       - key: ALLOWED_HOSTS
         value: "*.onrender.com"
 
-  - type: pserv
-    name: food-price-predictor-db
-    plan: free
+databases:
+  - name: food-price-predictor-db
     databaseName: food_price_db
-    databaseUser: food_price_user
+    user: food_price_user
+    plan: free
