@@ -61,9 +61,16 @@ def get_dropdown_options():
     # Load models if not already loaded
     load_models()
     
-    # Always include all top_10_features, even if not in encoders (use empty list if missing)
+    # Define which features should be numerical (input fields) vs categorical (dropdowns)
+    numerical_features = ['Year', 'Month', 'Price', 'Quantity', 'Volume', 'Amount', 'Size', 'Weight']
+    
+    # Only include categorical features in dropdown options
     if top_10_features and encoders:
-        options = {feature: list(encoders[feature].classes_) if feature in encoders else [] for feature in top_10_features}
+        options = {}
+        for feature in top_10_features:
+            # Only add to dropdown options if it's not a numerical feature and exists in encoders
+            if feature in encoders and not any(num_feat.lower() in feature.lower() for num_feat in numerical_features):
+                options[feature] = list(encoders[feature].classes_)
     else:
         options = {}
     
