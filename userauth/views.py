@@ -21,28 +21,36 @@ def register(request):
             user = form.save()
             login(request, user)
             
-            # Send welcome SMS
-            full_phone = f"{form.cleaned_data['country_code']}{form.cleaned_data['phone_number']}"
-            sms_message = f"Welcome to Food Price Predictor! Your account has been created successfully."
-            send_sms(full_phone, sms_message)
+            # Send welcome SMS (optional)
+            try:
+                if settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN:
+                    full_phone = f"{form.cleaned_data['country_code']}{form.cleaned_data['phone_number']}"
+                    sms_message = f"Welcome to Food Price Predictor! Your account has been created successfully."
+                    send_sms(full_phone, sms_message)
+            except Exception as e:
+                pass  # SMS is optional
             
-            # Send welcome email
-            email_message = f"""
-            Welcome to Food Price Predictor!
-            
-            Your account has been created successfully.
-            You can now start making predictions and receive them via SMS and email.
-            
-            Best regards,
-            Food Price Predictor Team
-            """
-            send_mail(
-                'Welcome to Food Price Predictor',
-                email_message,
-                settings.EMAIL_HOST_USER,
-                [user.email],
-                fail_silently=False,
-            )
+            # Send welcome email (optional)
+            try:
+                if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
+                    email_message = f"""
+                    Welcome to Food Price Predictor!
+                    
+                    Your account has been created successfully.
+                    You can now start making predictions and receive them via SMS and email.
+                    
+                    Best regards,
+                    Food Price Predictor Team
+                    """
+                    send_mail(
+                        'Welcome to Food Price Predictor',
+                        email_message,
+                        settings.EMAIL_HOST_USER,
+                        [user.email],
+                        fail_silently=True,
+                    )
+            except Exception as e:
+                pass  # Email is optional
             
             messages.success(request, 'Registration successful! Welcome messages have been sent.')
             return redirect('home')
