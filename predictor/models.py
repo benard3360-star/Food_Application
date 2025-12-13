@@ -31,6 +31,7 @@ class CommunityReport(models.Model):
     region = models.CharField(max_length=100)
     market = models.CharField(max_length=100)
     price = models.FloatField()
+    unit_quantity = models.CharField(max_length=20, default='1 kg', help_text='e.g., 1 kg, 2 lbs, 1 piece')
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:

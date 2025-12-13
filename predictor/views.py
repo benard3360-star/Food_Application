@@ -569,6 +569,7 @@ def community_reporting(request):
         region = request.POST.get('Region')
         market = request.POST.get('Market')
         price = request.POST.get('price')
+        unit_quantity = request.POST.get('unit_quantity', '1 kg')
         if commodity and region and market and price:
             CommunityReport.objects.create(
                 user=request.user,
@@ -577,7 +578,8 @@ def community_reporting(request):
                 county=county,
                 region=region,
                 market=market,
-                price=float(price)
+                price=float(price),
+                unit_quantity=unit_quantity
             )
             submitted = True
     reports = CommunityReport.objects.all()[:50]  # Show recent 50
@@ -791,7 +793,7 @@ def download_community_reports(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="community_reports.csv"'
     writer = csv.writer(response)
-    writer.writerow(['Food Item', 'Category', 'County', 'Region', 'Market', 'Price (KES/kg)', 'Submitted By', 'Timestamp (EAT)'])
+    writer.writerow(['Food Item', 'Category', 'County', 'Region', 'Market', 'Price (KES)', 'Unit Quantity', 'Submitted By', 'Timestamp (EAT)'])
     eat = pytz.timezone('Africa/Nairobi')
     for r in reports:
         # Convert timestamp to EAT
@@ -803,6 +805,7 @@ def download_community_reports(request):
             r.region,
             r.market,
             f"{r.price:.2f}",
+            r.unit_quantity or '1 kg',
             r.user.username,
             eat_time.strftime('%Y-%m-%d %H:%M:%S')
         ])

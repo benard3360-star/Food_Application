@@ -100,7 +100,7 @@
             </select>
           </div>
           <div class="col-md-2">
-            <label for="price" class="form-label">Price (KES/kg)</label>
+            <label for="price" class="form-label">Price (KES)</label>
             <input
               type="number"
               step="0.01"
@@ -108,6 +108,18 @@
               class="form-control"
               id="price"
               name="price"
+              required
+            />
+          </div>
+          <div class="col-md-2">
+            <label for="unit_quantity" class="form-label">Unit Quantity</label>
+            <input
+              type="text"
+              class="form-control"
+              id="unit_quantity"
+              name="unit_quantity"
+              placeholder="e.g., 1 kg, 2 lbs"
+              value="1 kg"
               required
             />
           </div>
@@ -137,7 +149,8 @@
                 <th>County</th>
                 <th>Region</th>
                 <th>Market</th>
-                <th>Price (KES/kg)</th>
+                <th>Price (KES)</th>
+                <th>Unit Quantity</th>
                 <th>Submitted By</th>
               </tr>
             </thead>
@@ -150,6 +163,7 @@
                 <td>{{ r.region }}</td>
                 <td>{{ r.market }}</td>
                 <td>{{ r.price|floatformat:2 }}</td>
+                <td>{{ r.unit_quantity|default:"1 kg" }}</td>
                 <td>{{ r.user }}</td>
               </tr>
               {% endfor %}
