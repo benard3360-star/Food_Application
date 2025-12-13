@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Budget Estimator</h2>
+  <p>Estimate your monthly food budget based on your income and household size.</p>
+  <form method="post" class="row g-3 mb-4">
+    {% csrf_token %}
+    <div class="col-md-4">
+      <label for="income" class="form-label">Monthly Income (KES)</label>
+      <input type="number" step="0.01" min="0" class="form-control" id="income" name="income" required>
+    </div>
+    <div class="col-md-4">
+      <label for="household_size" class="form-label">Household Size</label>
+      <input type="number" min="1" class="form-control" id="household_size" name="household_size" required>
+    </div>
+    <div class="col-md-4 align-self-end">
+      <button type="submit" class="btn btn-primary">Estimate Budget</button>
+    </div>
+  </form>
+  {% if budget %}
+    <div class="alert alert-info">
+      <h4>Recommended Monthly Food Budget</h4>
+      <p><strong>KES {{ budget.total|floatformat:2 }}</strong> ({{ budget.percent_of_income }}% of your income)</p>
+      <ul>
+        <li>Maize: KES {{ budget.maize|floatformat:2 }}</li>
+        <li>Rice: KES {{ budget.rice|floatformat:2 }}</li>
+        <li>Beans: KES {{ budget.beans|floatformat:2 }}</li>
+      </ul>
+      <small>Tip: Adjust your food choices for better nutrition and savings!</small>
+    </div>
+  {% endif %}
+</div>
+{% endblock %} 

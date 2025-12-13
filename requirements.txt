@@ -1,0 +1,31 @@
+# Core Django requirements
+Django==5.1.7
+djangorestframework==3.16.0
+django-crispy-forms==2.3
+crispy-bootstrap5==2024.10
+
+# Database
+psycopg2-binary==2.9.10
+
+# Static files and deployment
+whitenoise==6.9.0
+gunicorn==21.2.0
+
+# Configuration
+python-decouple==3.8
+dj-database-url==2.1.0
+
+# External services
+twilio==9.6.2
+openai==1.97.1
+requests==2.32.3
+
+# Machine Learning
+joblib==1.4.2
+numpy==2.2.4
+scikit-learn==1.6.1
+pandas==2.2.3
+
+# Utilities
+pytz==2025.1
+pillow==11.1.0

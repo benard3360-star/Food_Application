@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #3A7BD5;
+      --primary-dark: #1a3f8b;
+      --accent-color: #00D2FF;
+      --light-gray: #f8f9fa;
+      --dark-gray: #6c757d;
+      --success-color: #28a745;
+      --warning-color: #ffc107;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #3A7BD5, #00D2FF);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      margin: 0;
+      color: #333;
+    }
+
+    .register-container {
+      perspective: 1000px;
+      width: 100%;
+      max-width: 750px;
+    }
+
+    .register-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 50px 45px;
+      width: 100%;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2);
+      animation: fadeInUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transform-style: preserve-3d;
+      transition: all 0.5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes fadeInUp {
+      from { 
+        opacity: 0; 
+        transform: translateY(40px) rotateX(10deg);
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0) rotateX(0);
+      }
+    }
+
+    h3 {
+      text-align: center;
+      font-weight: 800;
+      margin-bottom: 40px;
+      color: var(--primary-dark);
+      font-size: 2rem;
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    h3::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      border-radius: 2px;
+    }
+
+    .form-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 30px;
+      transition: all 0.3s ease;
+    }
+
+    .form-group:hover {
+      transform: translateY(-2px);
+    }
+
+    .input-icon-container {
+      width: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 10px;
+    }
+
+    .input-icon {
+      font-size: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .input-wrapper {
+      flex: 1;
+      position: relative;
+    }
+
+    .form-control {
+      padding: 15px 20px;
+      border-radius: 12px;
+      border: 2px solid #e9ecef;
+      background-color: var(--light-gray);
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      font-size: 16px;
+      height: auto;
+      width: 100%;
+    }
+
+    /* Special styling for password fields */
+    .form-control[type="password"],
+    .form-control[type="text"][id*="password"] {
+      padding-right: 50px;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 5px 15px rgba(58, 123, 213, 0.2);
+      background-color: white;
+    }
+
+    .field-label {
+      display: block;
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--dark-gray);
+      padding-left: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus ~ .field-label {
+      color: var(--primary-dark);
+      font-weight: 500;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: 600;
+      transition: all 0.4s ease;
+      width: 100%;
+      margin-top: 20px;
+      letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 10px 25px rgba(58, 123, 213, 0.4);
+      transform: translateY(-3px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .text-center {
+      margin-top: 25px;
+      font-size: 15px;
+      color: var(--dark-gray);
+    }
+
+    .text-center a {
+      color: var(--primary-color);
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .text-center a:hover {
+      text-decoration: underline;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: var(--dark-gray);
+      transition: all 0.3s ease;
+      background: none;
+      border: none;
+      padding: 0;
+      z-index: 2;
+    }
+
+    .password-toggle:hover {
+      color: var(--primary-color);
+      transform: translateY(-50%) scale(1.2);
+    }
+
+    .errorlist {
+      list-style: none;
+      padding: 0;
+      margin-top: 5px;
+      color: #dc3545;
+      font-size: 13px;
+      animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+
+    /* Custom icon colors */
+    .fa-user { color: var(--primary-dark); }
+    .fa-envelope { color: #d63384; }
+    .fa-phone { color: var(--success-color); }
+    .fa-lock { color: var(--warning-color); }
+    .fa-key { color: #6f42c1; }
+
+    /* Success message styling */
+    .success-container {
+      text-align: center;
+      padding: 40px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .success-icon {
+      font-size: 60px;
+      color: var(--success-color);
+      margin-bottom: 20px;
+      animation: bounce 1s infinite alternate;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-10px); }
+    }
+
+    .success-message {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--primary-dark);
+    }
+
+    .redirect-message {
+      font-size: 16px;
+      color: var(--dark-gray);
+    }
+
+    /* Icon animations */
+    .input-icon {
+      transition: all 0.3s ease, transform 0.2s ease;
+    }
+
+    .input-icon:hover {
+      transform: scale(1.2) rotate(10deg);
+    }
+
+    @media (max-width: 768px) {
+      .register-card {
+        padding: 40px 25px;
+      }
+      
+      h3 {
+        font-size: 1.8rem;
+        margin-bottom: 30px;
+      }
+      
+      .form-group {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .input-icon-container {
+        margin-bottom: 10px;
+        margin-right: 0;
+        justify-content: flex-start;
+      }
+      
+      .form-control {
+        padding: 12px 15px;
+        font-size: 15px;
+      }
+      
+      .form-control[type="password"],
+      .form-control[type="text"][id*="password"] {
+        padding-right: 45px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <div class="register-card">
+      <!-- Success container (initially hidden) -->
+      <div id="successContainer" class="success-container" style="display: none;">
+        <i class="fas fa-check-circle success-icon"></i>
+        <div class="success-message">Account Created Successfully!</div>
+        <div class="redirect-message">You will be redirected to login page in <span id="countdown">10</span> seconds</div>
+      </div>
+      
+      <!-- Registration form (initially visible) -->
+      <div id="registrationSection">
+        <h3>Create Your Account</h3>
+        <form method="post" novalidate id="registrationForm">
+          {% csrf_token %}
+          {% for field in form %}
+          <div class="form-group">
+            <div class="input-icon-container">
+              <i class="fas {% if field.name == 'username' %}fa-user{% elif field.name == 'email' %}fa-envelope{% elif field.name == 'phone_number' %}fa-phone{% elif field.name == 'password1' %}fa-lock{% elif field.name == 'password2' %}fa-key{% endif %} input-icon"></i>
+            </div>
+            <div class="input-wrapper">
+              {{ field }}
+              {% if "password" in field.name %}
+                <button type="button" class="password-toggle" onclick="togglePassword('{{ field.auto_id }}')">
+                  <i class="fas fa-eye"></i>
+                </button>
+              {% endif %}
+              <span class="field-label">
+                {% if field.name == 'username' %}Choose a unique username{% endif %}
+                {% if field.name == 'email' %}Enter your email address{% endif %}
+                {% if field.name == 'phone_number' %}Your phone number{% endif %}
+                {% if field.name == 'password1' %}Create a strong password{% endif %}
+                {% if field.name == 'password2' %}Confirm your password{% endif %}
+              </span>
+              {{ field.errors }}
+              {% if field.help_text %}
+              <small class="form-text">{{ field.help_text|safe }}</small>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+          <button type="submit" class="btn btn-primary">
+            Register Now
+          </button>
+        </form>
+        <div class="text-center">
+          Already have an account? <a href="{% url 'login' %}">Login here</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function togglePassword(id) {
+      const input = document.getElementById(id);
+      const icon = document.querySelector(button[onclick="togglePassword('${id}')"] i);
+      
+      if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+      } else {
+        input.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+      }
+      
+      // Add animation
+      icon.style.transform = "translateY(-50%) scale(1.3)";
+      setTimeout(() => {
+        icon.style.transform = "translateY(-50%) scale(1)";
+      }, 200);
+    }
+    
+    // Handle form submission and redirection
+    document.getElementById('registrationForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Simulate successful registration (in a real app, this would be handled by your backend)
+      const registrationSection = document.getElementById('registrationSection');
+      const successContainer = document.getElementById('successContainer');
+      
+      // Hide form and show success message
+      registrationSection.style.display = 'none';
+      successContainer.style.display = 'block';
+      
+      // Start countdown
+      let seconds = 10;
+      const countdownElement = document.getElementById('countdown');
+      const countdownInterval = setInterval(function() {
+        seconds--;
+        countdownElement.textContent = seconds;
+        
+        if (seconds <= 0) {
+          clearInterval(countdownInterval);
+          window.location.href = "{% url 'login' %}";
+        }
+      }, 1000);
+      
+      // In a real application, you would submit the form to your backend
+      // and handle the response to show success/error messages
+      // Here's how you might do it:
+      /*
+      fetch('your-registration-endpoint', {
+        method: 'POST',
+        body: new FormData(this)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          registrationSection.style.display = 'none';
+          successContainer.style.display = 'block';
+          
+          let seconds = 10;
+          const countdownElement = document.getElementById('countdown');
+          const countdownInterval = setInterval(function() {
+            seconds--;
+            countdownElement.textContent = seconds;
+            
+            if (seconds <= 0) {
+              clearInterval(countdownInterval);
+              window.location.href = "{% url 'login' %}";
+            }
+          }, 1000);
+        } else {
+          // Handle errors
+        }
+      })
+      .catch(error => {
+        // Handle network errors
+      });
+      */
+    });
+
+    // Add interactive effects to icons
+    document.querySelectorAll('.input-icon').forEach(icon => {
+      icon.addEventListener('mouseenter', function() {
+        this.style.transform = "scale(1.2) rotate(10deg)";
+      });
+      
+      icon.addEventListener('mouseleave', function() {
+        this.style.transform = "scale(1) rotate(0)";
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,401 @@
+{% extends 'userauth/base.html' %}
+{% load static %}
+
+{% block title %}Home - Food Price Predictor{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <!-- Left Column -->
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h1 class="display-4 fw-bold text-primary mb-3">Food Price Prediction</h1>
+                <p class="lead text-muted mb-4">
+                    Empowering farmers, traders, and policymakers with accurate price predictions for agricultural commodities in Kenya.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">Dashboard</a>
+                    <a href="{% url 'make_prediction' %}" class="btn btn-outline-primary btn-lg">Make Prediction</a>
+                </div>
+            </div>
+            <!-- Right Column -->
+            <div class="col-lg-6">
+                <img src="https://images.pexels.com/photos/2255935/pexels-photo-2255935.jpeg" 
+                     alt="Agricultural Commodities" 
+                     class="img-fluid rounded shadow-lg"
+                     style="max-height: 400px; width: 100%; object-fit: cover;">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Project Overview Section -->
+<section class="project-overview py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">About the Project</h2>
+        
+        <!-- Project Description -->
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <p class="lead text-muted">
+                            The Food Price Predictor is an advanced machine learning system designed to predict agricultural commodity prices in Kenya. 
+                            By analyzing historical price data, seasonal patterns, market conditions, and other relevant variables, 
+                            our model can predict future price trends with high accuracy.
+                        </p>
+                        
+                        <!-- Additional Features Links -->
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="d-grid">
+                                    <a href="{% url 'market_trends' %}" class="btn btn-outline-primary btn-lg">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        {% if request.session.lang == 'sw' %}Mwelekeo wa Soko{% else %}Market Trends{% endif %}
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-grid">
+                                    <a href="{% url 'community_reporting' %}" class="btn btn-outline-success btn-lg">
+                                        <i class="fas fa-users me-2"></i>
+                                        {% if request.session.lang == 'sw' %}Ripoti ya Jamii{% else %}Community Reporting{% endif %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Goals -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h3 class="text-center mb-4">Project Goals</h3>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                                    <i class="fas fa-bullseye fa-2x p-3"></i>
+                                </div>
+                                <h4 class="card-title h5">Accurate Forecasting</h4>
+                                <p class="card-text text-muted">
+                                    Provide accurate price prediction for agricultural commodities to help stakeholders make informed decisions.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                                    <i class="fas fa-users fa-2x p-3"></i>
+                                </div>
+                                <h4 class="card-title h5">Farmer Support</h4>
+                                <p class="card-text text-muted">
+                                    Help farmers make informed decisions about planting, harvesting, and selling their produce.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                                    <i class="fas fa-shield-alt fa-2x p-3"></i>
+                                </div>
+                                <h4 class="card-title h5">Food Security</h4>
+                                <p class="card-text text-muted">
+                                    Reduce price volatility and improve food security in Kenya through better market planning.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Impact & Beneficiaries -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h3 class="text-center mb-4">Who Benefits from This Project?</h3>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon bg-success bg-gradient text-white rounded-circle mb-3">
+                                    <i class="fas fa-tractor fa-2x p-3"></i>
+                                </div>
+                                <h4 class="card-title h5">Farmers</h4>
+                                <p class="card-text text-muted">
+                                    Make informed decisions on planting, harvesting, and selling by accessing price forecasts and market trends.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon bg-info bg-gradient text-white rounded-circle mb-3">
+                                    <i class="fas fa-shopping-basket fa-2x p-3"></i>
+                                </div>
+                                <h4 class="card-title h5">Consumers & Households</h4>
+                                <p class="card-text text-muted">
+                                    Plan food purchases and budgets more effectively with price predictions and budget estimators.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon bg-warning bg-gradient text-white rounded-circle mb-3">
+                                    <i class="fas fa-balance-scale fa-2x p-3"></i>
+                                </div>
+                                <h4 class="card-title h5">Traders & Vendors</h4>
+                                <p class="card-text text-muted">
+                                    Identify the best markets for buying and selling commodities, maximizing profits and reducing losses.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-4 mt-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon bg-danger bg-gradient text-white rounded-circle mb-3">
+                                    <i class="fas fa-university fa-2x p-3"></i>
+                                </div>
+                                <h4 class="card-title h5">Policy Makers & Government</h4>
+                                <p class="card-text text-muted">
+                                    Use data-driven insights for food security planning, inflation monitoring, and market regulation.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon bg-secondary bg-gradient text-white rounded-circle mb-3">
+                                    <i class="fas fa-hands-helping fa-2x p-3"></i>
+                                </div>
+                                <h4 class="card-title h5">NGOs & Development Orgs</h4>
+                                <p class="card-text text-muted">
+                                    Target interventions and monitor food affordability and access using community reporting and dashboards.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                                    <i class="fas fa-chart-bar fa-2x p-3"></i>
+                                </div>
+                                <h4 class="card-title h5">Researchers & Analysts</h4>
+                                <p class="card-text text-muted">
+                                    Access real-time and historical data for analysis of food price trends and market dynamics.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technology Stack -->
+        <div class="row">
+            <div class="col-12">
+                <h3 class="text-center mb-4">Technology Stack</h3>
+                <div class="row g-4">
+                    <!-- Data Collection -->
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <h4 class="card-title h5 mb-3">
+                                    <i class="fas fa-database text-primary me-2"></i>
+                                    Data Collection
+                                </h4>
+                                <ul class="list-unstyled text-muted">
+                                    <li class="mb-2">✓ Historical price databases</li>
+                                    <li class="mb-2">✓ Market surveys</li>
+                                    <li class="mb-2">✓ Government agricultural statistics</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Analysis & Modeling -->
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <h4 class="card-title h5 mb-3">
+                                    <i class="fas fa-brain text-primary me-2"></i>
+                                    Analysis & Modeling
+                                </h4>
+                                <ul class="list-unstyled text-muted">
+                                    <li class="mb-2">✓ Data Preparation and Transformation</li>
+                                    <li class="mb-2">✓ Machine Learning algorithms</li>
+                                    <li class="mb-2">✓ Regression models</li>
+                                    <li class="mb-2">✓ Feature engineering</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Implementation -->
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <h4 class="card-title h5 mb-3">
+                                    <i class="fas fa-code text-primary me-2"></i>
+                                    Implementation
+                                </h4>
+                                <ul class="list-unstyled text-muted">
+                                    <li class="mb-2">✓ Python (Django framework)</li>
+                                    <li class="mb-2">✓ SQL database for storage</li>
+                                    <li class="mb-2">✓ Interactive data visualization</li>
+                                    <li class="mb-2">✓ User authentication system</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section py-5">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Accurate Predictions Card -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                            <i class="fas fa-chart-line fa-2x p-3"></i>
+                        </div>
+                        <h3 class="card-title h4">Accurate Predictions</h3>
+                        <p class="card-text text-muted">
+                            Our advanced machine learning model provides precise price predictions for various agricultural commodities, helping stakeholders make informed decisions.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Dashboard Card -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                            <i class="fas fa-tachometer-alt fa-2x p-3"></i>
+                        </div>
+                        <h3 class="card-title h4">User Dashboard</h3>
+                        <p class="card-text text-muted">
+                            Access a comprehensive dashboard with historical data, trend analysis, and personalized insights for your agricultural business.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Secure Authentication Card -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                            <i class="fas fa-shield-alt fa-2x p-3"></i>
+                        </div>
+                        <h3 class="card-title h4">Secure Authentication</h3>
+                        <p class="card-text text-muted">
+                            Your data is protected with industry-standard security measures, ensuring safe and confidential access to price predictions and analytics.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer bg-dark text-light py-5 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <h5 class="text-white mb-3">Contact Us</h5>
+                <p class="mb-2">
+                    <i class="fas fa-envelope me-2"></i>
+                    obernard377@gmail.com
+                </p>
+                <p class="mb-2">
+                    <i class="fas fa-phone me-2"></i>
+                    +254 742 423 200
+                </p>
+            </div>
+            <div class="col-md-4 mb-4 mb-md-0">
+                <h5 class="text-white mb-3">Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="{% url 'home' %}" class="text-light text-decoration-none">Home</a></li>
+                    <li class="mb-2"><a href="{% url 'dashboard' %}" class="text-light text-decoration-none">Dashboard</a></li>
+                    <li class="mb-2"><a href="{% url 'make_prediction' %}" class="text-light text-decoration-none">Make Prediction</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h5 class="text-white mb-3">Connect With Us</h5>
+                <div class="social-links">
+                    <a href="https://wa.me/254742423200" target="_blank" class="text-light me-3">
+                        <i class="fab fa-whatsapp fa-2x"></i>
+                    </a>
+                    <a href="https://facebook.com/yourpage" target="_blank" class="text-light me-3">
+                        <i class="fab fa-facebook fa-2x"></i>
+                    </a>
+                    <a href="https://twitter.com/yourhandle" target="_blank" class="text-light">
+                        <i class="fab fa-twitter fa-2x"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <hr class="mt-4 mb-4">
+        <div class="row">
+            <div class="col-12 text-center">
+                <p class="mb-0">&copy; 2024 Food Price Predictor. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<style>
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .hero-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .social-links a {
+        transition: opacity 0.3s ease;
+    }
+    
+    .social-links a:hover {
+        opacity: 0.8;
+    }
+
+    .project-overview .card {
+        transition: transform 0.3s ease;
+    }
+
+    .project-overview .card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %} 

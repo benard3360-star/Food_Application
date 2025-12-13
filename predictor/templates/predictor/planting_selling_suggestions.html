@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Season-Aware Planting & Selling Suggestions</h2>
+  <p>Get personalized planting and selling tips based on the season and your region.</p>
+  <form method="post" class="row g-3 mb-4">
+    {% csrf_token %}
+    <div class="col-md-5">
+      <label for="Region" class="form-label">Region</label>
+      <select class="form-select" id="Region" name="Region" required>
+        <option value="">Choose...</option>
+        {% for option in dropdown_options.Region %}
+          <option value="{{ option }}">{{ option }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-5">
+      <label for="month" class="form-label">Month</label>
+      <select class="form-select" id="month" name="month" required>
+        <option value="">Choose...</option>
+        <option value="January">January</option>
+        <option value="February">February</option>
+        <option value="March">March</option>
+        <option value="April">April</option>
+        <option value="May">May</option>
+        <option value="June">June</option>
+        <option value="July">July</option>
+        <option value="August">August</option>
+        <option value="September">September</option>
+        <option value="October">October</option>
+        <option value="November">November</option>
+        <option value="December">December</option>
+      </select>
+    </div>
+    <div class="col-md-2 align-self-end">
+      <button type="submit" class="btn btn-primary">Get Suggestion</button>
+    </div>
+  </form>
+  {% if suggestion %}
+    <div class="alert alert-info">
+      <strong>Suggestion:</strong> {{ suggestion }}
+    </div>
+  {% endif %}
+</div>
+{% endblock %} 

@@ -1,0 +1,378 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load predictor_extras %}
+
+{% block title %}Make Prediction - Food Price Predictor{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .main-container {
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .page-title {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .page-title h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+    }
+
+    /* Trends and Prediction Form Styles */
+    .trends-card, .prediction-form-card {
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+        background: rgba(255,255,255,0.98);
+        backdrop-filter: blur(15px);
+        min-height: 80vh;
+        transition: all 0.3s ease;
+    }
+
+    .trends-card:hover, .prediction-form-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+    }
+
+    .card-header {
+        padding: 1.5rem 2rem;
+        font-size: 1.3rem;
+        font-weight: 600;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .trend-item {
+        padding: 20px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        border-left: 5px solid #007bff;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .trend-item:hover {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        transform: translateX(10px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .trend-item strong {
+        font-size: 1.1rem;
+        color: #2c3e50;
+    }
+
+    .trend-item .badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+    }
+
+    .progress {
+        height: 8px;
+        border-radius: 10px;
+        background: rgba(0,0,0,0.1);
+    }
+
+    .progress-bar {
+        border-radius: 10px;
+    }
+
+    .trends-insights {
+        background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 50%, #e8f5e8 100%);
+        padding: 25px;
+        border-radius: 15px;
+        border: 2px solid rgba(255,255,255,0.3);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .trends-insights h6 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .trends-insights ul li {
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        font-size: 1rem;
+    }
+
+    .trends-insights ul li:last-child {
+        border-bottom: none;
+    }
+
+    .trends-insights ul li i {
+        font-size: 1.1rem;
+    }
+
+    .prediction-form-card .form-control, .prediction-form-card .form-select {
+        border-radius: 12px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        padding: 12px 15px;
+        font-size: 1rem;
+        background: rgba(255,255,255,0.9);
+    }
+
+    .prediction-form-card .form-control:focus, .prediction-form-card .form-select:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.3rem rgba(40, 167, 69, 0.25);
+        background: white;
+        transform: scale(1.02);
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 50%, #17a2b8 100%);
+        border: none;
+        border-radius: 30px;
+        padding: 15px 40px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 12px 35px rgba(40, 167, 69, 0.4);
+        background: linear-gradient(135deg, #20c997 0%, #17a2b8 50%, #28a745 100%);
+    }
+
+    .alert-success {
+        border-radius: 15px;
+        border: none;
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
+    }
+
+    .alert-success h5 {
+        color: #155724;
+        font-weight: 600;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .page-title h2 {
+            font-size: 2rem;
+        }
+        
+        .trends-card, .prediction-form-card {
+            min-height: auto;
+            margin-bottom: 2rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<div class="main-container">
+    <div class="container">
+        <div class="page-title">
+            <h2>
+                <i class="fas fa-chart-line me-3"></i>Make a Price Prediction
+            </h2>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Left Side - Trends Section -->
+            <div class="col-lg-6">
+                <div class="trends-card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="fas fa-chart-line me-2"></i>Food Price Trends in Kenya</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="trends-content">
+                            <h5 class="text-primary mb-4" style="font-size: 1.3rem; font-weight: 600;">Recent Price Changes by County</h5>
+                        
+                        <!-- Nairobi Trends -->
+                        <div class="trend-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Nairobi County</strong>
+                                    <small class="text-muted d-block">Urban markets</small>
+                                </div>
+                                <span class="badge bg-success">+5.2%</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div class="progress-bar bg-success" style="width: 75%"></div>
+                            </div>
+                            <small class="text-muted">Maize: KES 45-52/kg, Rice: KES 120-135/kg</small>
+                        </div>
+
+                        <!-- Mombasa Trends -->
+                        <div class="trend-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Mombasa County</strong>
+                                    <small class="text-muted d-block">Coastal region</small>
+                                </div>
+                                <span class="badge bg-warning">+3.8%</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div class="progress-bar bg-warning" style="width: 60%"></div>
+                            </div>
+                            <small class="text-muted">Maize: KES 42-48/kg, Rice: KES 115-130/kg</small>
+                        </div>
+
+                        <!-- Kisumu Trends -->
+                        <div class="trend-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Kisumu County</strong>
+                                    <small class="text-muted d-block">Western region</small>
+                                </div>
+                                <span class="badge bg-info">+2.1%</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div class="progress-bar bg-info" style="width: 45%"></div>
+                            </div>
+                            <small class="text-muted">Maize: KES 38-45/kg, Rice: KES 110-125/kg</small>
+                        </div>
+
+                        <!-- Nakuru Trends -->
+                        <div class="trend-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Nakuru County</strong>
+                                    <small class="text-muted d-block">Rift Valley</small>
+                                </div>
+                                <span class="badge bg-danger">+7.5%</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div class="progress-bar bg-danger" style="width: 85%"></div>
+                            </div>
+                            <small class="text-muted">Maize: KES 40-47/kg, Rice: KES 118-132/kg</small>
+                        </div>
+
+                        <!-- Eldoret Trends -->
+                        <div class="trend-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Uasin Gishu County</strong>
+                                    <small class="text-muted d-block">North Rift</small>
+                                </div>
+                                <span class="badge bg-success">+1.8%</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div class="progress-bar bg-success" style="width: 40%"></div>
+                            </div>
+                            <small class="text-muted">Maize: KES 35-42/kg, Rice: KES 105-120/kg</small>
+                        </div>
+
+                        <hr class="my-4">
+                        
+                        <div class="trends-insights">
+                            <h6 class="text-primary mb-3"><i class="fas fa-lightbulb me-2"></i>Key Insights</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-arrow-up text-success me-2"></i>Overall price increase of 4.1% in the last quarter</li>
+                                <li class="mb-2"><i class="fas fa-map-marker-alt text-info me-2"></i>Urban areas showing higher volatility than rural markets</li>
+                                <li class="mb-2"><i class="fas fa-seedling text-warning me-2"></i>Seasonal factors affecting maize prices significantly</li>
+                                <li class="mb-2"><i class="fas fa-truck text-primary me-2"></i>Transport costs impacting coastal and northern regions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <!-- Right Side - Prediction Form -->
+            <div class="col-lg-6">
+                <div class="prediction-form-card">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="fas fa-calculator me-2"></i>Price Prediction Form</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'make_prediction' %}">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                {% for feature in top_6_features %}
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label" for="{{ feature }}">{{ feature|title }}</label>
+                                            {% if feature in dropdown_options %}
+                                                <select class="form-select" id="{{ feature }}" name="{{ feature }}" required>
+                                                    <option value="" disabled selected>Select {{ feature|title }}</option>
+                                                    {% for option in dropdown_options|get_item:feature %}
+                                                        <option value="{{ option }}" {% if form_data and form_data|get_item:feature == option %}selected{% endif %}>{{ option }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            {% else %}
+                                                <input
+                                                    type="number"
+                                                    step="any"
+                                                    class="form-control"
+                                                    id="{{ feature }}"
+                                                    name="{{ feature }}"
+                                                    placeholder="Enter {{ feature|title }}"
+                                                    required
+                                                    value="{% if form_data %}{{ form_data|get_item:feature }}{% endif %}"
+                                                />
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="text-center mt-5">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-magic me-2"></i>Predict Price
+                                </button>
+                            </div>
+                        </form>
+                        
+                        {% if prediction %}
+                        <div class="alert alert-success mt-4" role="alert">
+                            <h5 class="alert-heading"><i class="fas fa-check-circle me-2"></i>Prediction Result</h5>
+                            <p class="mb-0">Predicted Price: <strong>KES {{ prediction|floatformat:2 }}</strong></p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome for icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+{% endblock %} 

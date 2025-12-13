@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Market Alerts</h2>
+  <p>Subscribe to real-time price alerts for your region and favorite food items.</p>
+  <form method="post" class="row g-3 mb-4">
+    {% csrf_token %}
+    <div class="col-md-4">
+      <label for="Commodity" class="form-label">Food Item (Commodity)</label>
+      <select class="form-select" id="Commodity" name="Commodity" required>
+        <option value="">Choose...</option>
+        {% for option in dropdown_options.Commodity %}
+          <option value="{{ option }}">{{ option }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label for="Region" class="form-label">Region</label>
+      <select class="form-select" id="Region" name="Region" required>
+        <option value="">Choose...</option>
+        {% for option in dropdown_options.Region %}
+          <option value="{{ option }}">{{ option }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4 align-self-end">
+      <button type="submit" class="btn btn-primary">Subscribe</button>
+    </div>
+  </form>
+  {% if subscribed %}
+    <div class="alert alert-success">You have subscribed to alerts for <strong>{{ sub_commodity }}</strong> in <strong>{{ sub_region }}</strong>.</div>
+  {% endif %}
+  {% if subscriptions %}
+    <h5>Your Subscriptions:</h5>
+    <ul class="list-group mb-3">
+      {% for sub in subscriptions %}
+        <li class="list-group-item">{{ sub.Commodity }} in {{ sub.Region }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>
+{% endblock %} 

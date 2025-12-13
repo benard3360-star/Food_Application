@@ -1,0 +1,436 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Market Trends - Food Price Predictor{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .main-container {
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .page-title {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .page-title h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+    }
+
+    .map-container {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .map-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        display: flex;
+        justify-content: between;
+        align-items: center;
+    }
+
+    .map-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .map-controls {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .refresh-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .refresh-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.05);
+    }
+
+    .map-wrapper {
+        height: 70vh;
+        position: relative;
+    }
+
+    #kenyaMap {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    .market-popup {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        padding: 1.5rem;
+        max-width: 400px;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .market-popup h3 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 0.5rem;
+    }
+
+    .market-info {
+        margin-bottom: 1rem;
+    }
+
+    .market-info p {
+        margin: 0.3rem 0;
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+
+    .commodity-list {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .commodity-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem;
+        border-bottom: 1px solid #ecf0f1;
+        transition: background-color 0.3s ease;
+    }
+
+    .commodity-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .commodity-item:last-child {
+        border-bottom: none;
+    }
+
+    .commodity-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .commodity-price {
+        color: #27ae60;
+        font-weight: 600;
+    }
+
+    .commodity-category {
+        font-size: 0.8rem;
+        color: #95a5a6;
+        background: #ecf0f1;
+        padding: 0.2rem 0.5rem;
+        border-radius: 10px;
+        margin-left: 0.5rem;
+    }
+
+    .last-updated {
+        font-size: 0.8rem;
+        color: #95a5a6;
+        text-align: center;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #ecf0f1;
+    }
+
+    .loading-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+        color: #7f8c8d;
+    }
+
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(15px);
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: #7f8c8d;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        .page-title h1 {
+            font-size: 2rem;
+        }
+        
+        .map-wrapper {
+            height: 50vh;
+        }
+        
+        .map-header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="main-container">
+    <div class="container">
+        <div class="page-title">
+            <h1>
+                <i class="fas fa-map-marked-alt me-3"></i>Real-Time Market Trends Map
+            </h1>
+            <p class="mb-0 mt-2">Interactive map showing live commodity prices across Kenyan markets</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-value" id="totalMarkets">-</div>
+                <div class="stat-label">Active Markets</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalCommodities">-</div>
+                <div class="stat-label">Commodities Tracked</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="lastUpdate">-</div>
+                <div class="stat-label">Last Updated</div>
+            </div>
+        </div>
+
+        <!-- Interactive Map -->
+        <div class="map-container">
+            <div class="map-header">
+                <h2><i class="fas fa-map me-2"></i>Kenya Market Map</h2>
+                <div class="map-controls">
+                    <button class="refresh-btn" onclick="refreshMarketData()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh Data
+                    </button>
+                    <span id="updateStatus" class="text-white-50">Loading...</span>
+                </div>
+            </div>
+            <div class="map-wrapper">
+                <div id="kenyaMap"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet CSS and JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    let map;
+    let marketMarkers = [];
+    let marketData = [];
+
+    // Initialize the map
+    function initMap() {
+        // Center on Kenya
+        map = L.map('kenyaMap').setView([-0.0236, 37.9062], 6);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Load market data
+        loadMarketData();
+    }
+
+    // Load market data from API
+    async function loadMarketData() {
+        try {
+            const response = await fetch('/predictor/api/market-data/');
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                marketData = result.data;
+                updateMapMarkers();
+                updateStatistics(result);
+                document.getElementById('updateStatus').textContent = 'Data loaded successfully';
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            console.error('Error loading market data:', error);
+            document.getElementById('updateStatus').textContent = 'Error loading data';
+            showFallbackMarkers();
+        }
+    }
+
+    // Update map markers with market data
+    function updateMapMarkers() {
+        // Clear existing markers
+        marketMarkers.forEach(marker => map.removeLayer(marker));
+        marketMarkers = [];
+
+        // Add new markers
+        marketData.forEach(market => {
+            const marker = L.marker([market.coordinates.lat, market.coordinates.lng])
+                .addTo(map)
+                .bindPopup(createMarketPopup(market), {
+                    maxWidth: 400,
+                    className: 'market-popup'
+                });
+            
+            marketMarkers.push(marker);
+        });
+    }
+
+    // Create popup content for market
+    function createMarketPopup(market) {
+        const commodities = Object.entries(market.commodities);
+        const lastUpdated = new Date(market.last_updated).toLocaleString();
+        
+        let commoditiesHtml = '';
+        if (commodities.length > 0) {
+            commoditiesHtml = `
+                <div class="commodity-list">
+                    ${commodities.map(([name, data]) => `
+                        <div class="commodity-item">
+                            <div>
+                                <span class="commodity-name">${name}</span>
+                                <span class="commodity-category">${data.category}</span>
+                            </div>
+                            <span class="commodity-price">KES ${data.price.toFixed(2)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            commoditiesHtml = '<p class="text-muted">No recent price data available</p>';
+        }
+
+        return `
+            <div class="market-popup">
+                <h3><i class="fas fa-store me-2"></i>${market.name}</h3>
+                <div class="market-info">
+                    <p><i class="fas fa-map-marker-alt me-2"></i><strong>Region:</strong> ${market.region}</p>
+                    <p><i class="fas fa-building me-2"></i><strong>County:</strong> ${market.county}</p>
+                    <p><i class="fas fa-boxes me-2"></i><strong>Commodities:</strong> ${market.commodity_count}</p>
+                </div>
+                ${commoditiesHtml}
+                <div class="last-updated">
+                    <i class="fas fa-clock me-2"></i>Last updated: ${lastUpdated}
+                </div>
+            </div>
+        `;
+    }
+
+    // Update statistics
+    function updateStatistics(result) {
+        document.getElementById('totalMarkets').textContent = result.total_markets;
+        
+        const totalCommodities = marketData.reduce((sum, market) => sum + market.commodity_count, 0);
+        document.getElementById('totalCommodities').textContent = totalCommodities;
+        
+        const now = new Date();
+        document.getElementById('lastUpdate').textContent = now.toLocaleTimeString();
+    }
+
+    // Show fallback markers for major cities if API fails
+    function showFallbackMarkers() {
+        const fallbackMarkets = [
+            { name: 'Nairobi Central Market', lat: -1.2921, lng: 36.8219, region: 'Nairobi' },
+            { name: 'Mombasa Market', lat: -4.0435, lng: 39.6682, region: 'Mombasa' },
+            { name: 'Kisumu Market', lat: -0.0917, lng: 34.7680, region: 'Kisumu' },
+            { name: 'Nakuru Market', lat: -0.3072, lng: 36.0800, region: 'Nakuru' },
+            { name: 'Eldoret Market', lat: 0.5143, lng: 35.2698, region: 'Eldoret' }
+        ];
+
+        fallbackMarkets.forEach(market => {
+            const marker = L.marker([market.lat, market.lng])
+                .addTo(map)
+                .bindPopup(`
+                    <div class="market-popup">
+                        <h3><i class="fas fa-store me-2"></i>${market.name}</h3>
+                        <p><strong>Region:</strong> ${market.region}</p>
+                        <p class="text-muted">No recent data available. Check back later!</p>
+                    </div>
+                `);
+            marketMarkers.push(marker);
+        });
+
+        document.getElementById('totalMarkets').textContent = fallbackMarkets.length;
+        document.getElementById('totalCommodities').textContent = 'N/A';
+        document.getElementById('lastUpdate').textContent = 'Offline';
+    }
+
+    // Refresh market data
+    function refreshMarketData() {
+        document.getElementById('updateStatus').textContent = 'Refreshing...';
+        loadMarketData();
+    }
+
+    // Auto-refresh every 5 minutes
+    setInterval(refreshMarketData, 300000);
+
+    // Initialize map when page loads
+    document.addEventListener('DOMContentLoaded', initMap);
+</script>
+{% endblock %}

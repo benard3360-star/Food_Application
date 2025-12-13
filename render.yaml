@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: food-price-predictor
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn food_price_project.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DJANGO_SETTINGS_MODULE
+        value: food_price_project.settings_prod
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "food-price-predictor.onrender.com,localhost,127.0.0.1"
+
+  - type: pserv
+    name: food-price-predictor-db
+    env: postgresql
+    plan: free
+    databaseName: food_price_db
+    databaseUser: food_price_user

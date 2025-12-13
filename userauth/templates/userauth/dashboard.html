@@ -1,0 +1,39 @@
+{% extends 'userauth/base.html' %}
+
+{% block title %}Dashboard - Food Price Predictor{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Welcome, {{ user.username }}!</h1>
+            
+            <!-- Prediction Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4 mb-3">Make a Prediction</h2>
+                    <p class="card-text text-muted mb-4">
+                        Use our advanced machine learning model to predict agricultural commodity prices.
+                    </p>
+                    <a href="{% url 'make_prediction' %}" class="btn btn-primary">
+                        <i class="fas fa-chart-line me-2"></i>Make Prediction
+                    </a>
+                </div>
+            </div>
+
+            <!-- Download Section -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title h4 mb-3">Download Predictions</h2>
+                    <p class="card-text text-muted mb-4">
+                        Download your prediction history as a CSV file for further analysis.
+                    </p>
+                    <a href="{% url 'download_predictions' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-download me-2"></i>Download CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

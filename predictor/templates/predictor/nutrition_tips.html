@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Nutrition Tips</h2>
+  <p>Get nutritional advice and tips based on your main staple food.</p>
+  <form method="post" class="row g-3 mb-4">
+    {% csrf_token %}
+    <div class="col-md-6">
+      <label for="Commodity" class="form-label">Main Staple Food (Commodity)</label>
+      <select class="form-select" id="Commodity" name="Commodity" required>
+        <option value="">Choose...</option>
+        {% for option in dropdown_options.Commodity %}
+          <option value="{{ option }}">{{ option }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6 align-self-end">
+      <button type="submit" class="btn btn-success">Get Nutrition Tip</button>
+    </div>
+  </form>
+  {% if tip %}
+    <div class="alert alert-info">
+      <strong>Nutrition Tip:</strong> {{ tip }}
+    </div>
+  {% endif %}
+</div>
+{% endblock %} 

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Cheapest Market Recommender</h2>
+  <p>Find the cheapest market for your selected food item and region.</p>
+  <form method="post" class="row g-3 mb-4">
+    {% csrf_token %}
+    <div class="col-md-4">
+      <label for="Commodity" class="form-label">Food Item (Commodity)</label>
+      <select class="form-select" id="Commodity" name="Commodity" required>
+        <option value="">Choose...</option>
+        {% for option in dropdown_options.Commodity %}
+          <option value="{{ option }}">{{ option }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label for="Region" class="form-label">Region</label>
+      <select class="form-select" id="Region" name="Region" required>
+        <option value="">Choose...</option>
+        {% for option in dropdown_options.Region %}
+          <option value="{{ option }}">{{ option }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4 align-self-end">
+      <button type="submit" class="btn btn-primary">Find Cheapest Market</button>
+    </div>
+  </form>
+  {% if cheapest_market %}
+    <div class="alert alert-success">
+      <h4>Cheapest Market Found!</h4>
+      <p><strong>{{ cheapest_market.market }}</strong> in <strong>{{ cheapest_market.region }}</strong> offers <strong>{{ cheapest_market.food_item }}</strong> at <strong>KES {{ cheapest_market.price|floatformat:2 }}</strong> per kg.</p>
+    </div>
+  {% elif searched %}
+    <div class="alert alert-warning">No data found for your selection. Try another combination.</div>
+  {% endif %}
+</div>
+{% endblock %} 

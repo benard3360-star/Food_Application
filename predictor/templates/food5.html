@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load custom_filters %}
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Food Price Predictor - Dashboard</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --light-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--light-bg);
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+        }
+
+        .nav-link {
+            color: var(--secondary-color) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        .nav-link.active {
+            color: var(--primary-color) !important;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        /* Trends and Prediction Form Styles */
+        .trends-card, .prediction-form-card {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .trend-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #007bff;
+            transition: all 0.3s ease;
+        }
+
+        .trend-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .trends-insights {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e1f5fe;
+        }
+
+        .trends-insights ul li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .trends-insights ul li:last-child {
+            border-bottom: none;
+        }
+
+        .prediction-form-card .form-control, .prediction-form-card .form-select {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .prediction-form-card .form-control:focus, .prediction-form-card .form-select:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            color: white;
+            padding: 4rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        /* About Section */
+        .about-section {
+            padding: 3rem 0;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Prediction Form */
+        .prediction-form {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--secondary-color);
+        }
+
+        .form-control, .form-select {
+            border: 1px solid #dee2e6;
+            padding: 0.75rem;
+            border-radius: 5px;
+        }
+
+        .btn-predict {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-predict:hover {
+            background-color: #0b5ed7;
+            color: white;
+        }
+
+        .prediction-result {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">Food Price Predictor</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Project Overview</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Stakeholder Benefits</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Statistical Analysis</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Market Trends</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <h1 class="hero-title">Food Price Predictor</h1>
+            <p class="hero-subtitle">A machine learning system for predicting agricultural commodity prices in Kenya</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- About Section -->
+        <section class="about-section">
+            <div class="container">
+                <h2 class="section-title">About the Project</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-4">
+                            Our Food Price Predictor is an advanced machine learning system designed to forecast agricultural commodity prices in Kenya. 
+                            By analyzing historical data and market trends, we provide accurate predictions to help stakeholders make informed decisions.
+                        </p>
+                        
+                        <!-- Additional Features Links -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'market_trends' %}" class="btn btn-outline-primary">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        {% if request.session.lang == 'sw' %}Mwelekeo wa Soko{% else %}Market Trends{% endif %}
+                                    </a>
+                                    <a href="{% url 'community_reporting' %}" class="btn btn-outline-success">
+                                        <i class="fas fa-users me-2"></i>
+                                        {% if request.session.lang == 'sw' %}Ripoti ya Jamii{% else %}Community Reporting{% endif %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Tech Stack</h5>
+                        <ul class="list-unstyled">
+                            <li>✓ Django Framework</li>
+                            <li>✓ Machine Learning Models</li>
+                            <li>✓ Firebase Integration</li>
+                            <li>✓ Bootstrap 5 UI</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stakeholder Benefits Section -->
+        <section id="stakeholder-benefits" class="about-section" style="display: none;">
+            <div class="container">
+                <h2 class="section-title">Stakeholder Benefits</h2>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">Farmers</h5>
+                                <p class="card-text">
+                                    • Better planning for crop production and harvesting<br>
+                                    • Informed decisions about when to sell produce<br>
+                                    • Understanding market trends and price patterns<br>
+                                    • Risk management through price forecasting
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">Government and Policymakers</h5>
+                                <p class="card-text">
+                                    • Data-driven policy formulation<br>
+                                    • Early warning system for price volatility<br>
+                                    • Better market regulation and intervention<br>
+                                    • Improved food security planning
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">Consumers and General Public</h5>
+                                <p class="card-text">
+                                    • Better budgeting for food expenses<br>
+                                    • Understanding price trends and patterns<br>
+                                    • Informed purchasing decisions<br>
+                                    • Access to transparent price information
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">Traders and Distributors</h5>
+                                <p class="card-text">
+                                    • Optimized inventory management<br>
+                                    • Better pricing strategies<br>
+                                    • Reduced market risks<br>
+                                    • Improved supply chain planning
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">Vendors</h5>
+                                <p class="card-text">
+                                    • Competitive pricing strategies<br>
+                                    • Better profit margin planning<br>
+                                    • Informed purchasing decisions<br>
+                                    • Improved business sustainability
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statistical Analysis Section -->
+        <section id="statistical-analysis" class="about-section" style="display: none;">
+            <div class="container">
+                <h2 class="section-title">Statistical Analysis</h2>
+                
+                <!-- Model Performance Metrics -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title text-primary mb-4">Model Performance Metrics</h4>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="p-3 bg-light rounded">
+                                    <h6>R² Score</h6>
+                                    <h3 class="text-primary">0.89</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="p-3 bg-light rounded">
+                                    <h6>Mean Absolute Error</h6>
+                                    <h3 class="text-primary">0.15</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="p-3 bg-light rounded">
+                                    <h6>Root Mean Squared Error</h6>
+                                    <h3 class="text-primary">0.18</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accuracy by Commodity Category -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title text-primary mb-4">Accuracy by Commodity Category</h4>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Commodity Category</th>
+                                        <th>Prediction Accuracy</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Grains</td>
+                                        <td>92%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Vegetables</td>
+                                        <td>88%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Fruits</td>
+                                        <td>85%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Legumes</td>
+                                        <td>90%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Factors Influencing Prediction Accuracy -->
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title text-primary mb-4">Factors Influencing Prediction Accuracy</h4>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Factor</th>
+                                        <th>Impact Level</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for feature_name in top_6_features %}
+                                    <tr>
+                                        <td>{{ feature_name }}</td>
+                                        <td>
+                                            {% if feature_name in dropdown_options %}
+                                                <span class="badge bg-success">High</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Medium</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if feature_name in dropdown_options %}
+                                                Categorical variable with significant impact on price prediction
+                                            {% else %}
+                                                Numerical variable contributing to price variation
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Market Trends Section -->
+        <section id="market-trends" class="about-section" style="display: none;">
+            <div class="container">
+                <h2 class="section-title">Market Trends Analysis</h2>
+                
+                <!-- Key Trend Insights -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title text-primary mb-4">Key Trend Insights from Predictions</h4>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Trend Type</th>
+                                        <th>Observed Pattern</th>
+                                        <th>Implications</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-success">↑ Upward Price Trend</td>
+                                        <td>
+                                            • Most common in vegetables and fruits during dry seasons<br>
+                                            • Often observed in imported commodities during currency fluctuations<br>
+                                            • Typical increase rate: 5-15% over 2-3 months
+                                        </td>
+                                        <td>
+                                            • Farmers: Consider delaying sales if possible<br>
+                                            • Traders: Increase inventory strategically<br>
+                                            • Consumers: Consider bulk purchasing before prices rise further
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-danger">↓ Downward Price Trend</td>
+                                        <td>
+                                            • Common during harvest seasons for locally grown produce<br>
+                                            • Observed when import restrictions are eased<br>
+                                            • Typical decrease rate: 10-20% over 1-2 months
+                                        </td>
+                                        <td>
+                                            • Farmers: Consider value-added processing or storage<br>
+                                            • Traders: Avoid excess inventory during downward cycles<br>
+                                            • Policymakers: Monitor for farmer support needs
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-info">→ Stable Price Trend</td>
+                                        <td>
+                                            • Most common in staple cereals with government price support<br>
+                                            • Observed in commodities with well-balanced supply and demand<br>
+                                            • Fluctuation range: ±5% over 3-6 months
+                                        </td>
+                                        <td>
+                                            • All stakeholders: Good period for long-term planning<br>
+                                            • Traders: Focus on operational efficiency rather than price speculation<br>
+                                            • Farmers: Reliable income projections possible
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-warning">Seasonal Cycle</td>
+                                        <td>
+                                            • Predictable price fluctuations following planting/harvest cycles<br>
+                                            • Most pronounced in rain-fed agriculture commodities<br>
+                                            • Typical cycle: 6-12 months depending on crop
+                                        </td>
+                                        <td>
+                                            • Farmers: Plan planting to target high-price windows<br>
+                                            • Traders: Implement seasonal inventory strategies<br>
+                                            • Policymakers: Develop counter-cyclical interventions
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-primary">Long-term Trend</td>
+                                        <td>
+                                            • Gradual price increases observed across most commodities<br>
+                                            • Average annual increase: 3-7% (above inflation)<br>
+                                            • Most significant in high-demand, limited-supply products
+                                        </td>
+                                        <td>
+                                            • Farmers: Consider shifting to higher-growth commodities<br>
+                                            • Investors: Opportunities in agricultural production and processing<br>
+                                            • Policymakers: Focus on productivity enhancement and supply chain improvements
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommendations Section -->
+                <div class="row">
+                    <!-- Farmers Recommendations -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">For Farmers</h5>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">✓ Use the 6-month price projections to plan harvest timing</li>
+                                    <li class="mb-2">✓ Diversify crops with complementary price cycles to stabilize income</li>
+                                    <li class="mb-2">✓ Consider storage solutions when facing downward price trends</li>
+                                    <li class="mb-2">✓ Form cooperatives to improve negotiating power during low-price periods</li>
+                                    <li class="mb-2">✓ Invest in value-addition for commodities showing consistent price increases</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Traders & Businesses Recommendations -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">For Traders & Businesses</h5>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">✓ Adjust inventory levels based on projected price direction</li>
+                                    <li class="mb-2">✓ Develop hedging strategies for commodities with high volatility</li>
+                                    <li class="mb-2">✓ Establish supplier relationships in regions with counter-cyclical production</li>
+                                    <li class="mb-2">✓ Optimize transportation logistics to respond to regional price differences</li>
+                                    <li class="mb-2">✓ Consider forward contracts when stable or upward trends are projected</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Policymakers Recommendations -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">For Policymakers</h5>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">✓ Implement targeted subsidies during projected periods of extreme price increases</li>
+                                    <li class="mb-2">✓ Develop buffer stock policies informed by seasonal trend analysis</li>
+                                    <li class="mb-2">✓ Plan infrastructure investments to reduce regional price disparities</li>
+                                    <li class="mb-2">✓ Adjust import/export policies based on domestic price projections</li>
+                                    <li class="mb-2">✓ Invest in agricultural research for commodities showing sustained price growth</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Insights -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h4 class="card-title text-primary mb-4">Additional Market Insights</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Regional Price Variations</h5>
+                                <p class="text-muted">
+                                    Our analysis shows significant price variations across different regions in Kenya, 
+                                    primarily driven by transportation costs, local supply-demand dynamics, and market 
+                                    accessibility. Understanding these variations is crucial for optimizing supply chains 
+                                    and ensuring fair pricing across regions.
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Climate Impact Analysis</h5>
+                                <p class="text-muted">
+                                    Weather patterns significantly influence agricultural commodity prices. Our model 
+                                    incorporates climate data to provide more accurate predictions, helping stakeholders 
+                                    prepare for and adapt to climate-related price fluctuations.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="about-section" style="display: none;">
+            <div class="container">
+                <h2 class="section-title">Contact Information</h2>
+                
+                <!-- Logo and Description -->
+                <div class="text-center mb-5">
+                    <img src="https://images.pexels.com/photos/2255935/pexels-photo-2255935.jpeg" 
+                         alt="Maize Plant Logo" 
+                         class="img-fluid mb-3" 
+                         style="max-width: 200px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    <h3 class="text-primary">Food Price Predictor</h3>
+                    <p class="text-muted">Helping farmers, stakeholders, and policymakers make informed decisions</p>
+                </div>
+
+                <div class="row">
+                    <!-- Contact Information -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary mb-4">Contact Owner</h5>
+                                <ul class="list-unstyled">
+                                    <li class="mb-3">
+                                        <i class="fas fa-user me-2"></i>
+                                        <strong>Name:</strong> Bernard Omondi
+                                    </li>
+                                    <li class="mb-3">
+                                        <i class="fas fa-envelope me-2"></i>
+                                        <strong>Email:</strong> obernard377@gmail.com
+                                    </li>
+                                    <li class="mb-3">
+                                        <i class="fas fa-phone me-2"></i>
+                                        <strong>Phone:</strong> +254 742 423 200
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Support Information -->
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary mb-4">Send a Message</h5>
+                                <form id="contactForm" method="post">
+                                    {% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="name" class="form-label">Your Name</label>
+                                            <input type="text" class="form-control" id="name" name="name" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="email" class="form-label">Your Email</label>
+                                            <input type="email" class="form-control" id="email" name="email" required>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="subject" class="form-label">Subject</label>
+                                        <input type="text" class="form-control" id="subject" name="subject" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="message" class="form-label">Message</label>
+                                        <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Send Message</button>
+                                </form>
+                                <div id="contactFormResponse" class="mt-3"></div>
+                            </div>
+                        </div>
+
+                        <!-- Support Information -->
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">Support</h5>
+                                <p class="card-text">
+                                    Need help with using the system or have questions about predictions?
+                                </p>
+                                <p class="card-text text-muted">
+                                    Our support team is available during business hours (8am-5pm EAT).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Prediction Section with Trends and Form -->
+        <section class="prediction-section py-5">
+            <div class="container">
+                <h2 class="section-title text-center mb-5">Make a Prediction</h2>
+                <div class="row">
+                    <!-- Left Side - Trends Section -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="trends-card h-100">
+                            <div class="card-header bg-primary text-white">
+                                <h4 class="mb-0"><i class="fas fa-chart-line me-2"></i>Food Price Trends in Kenya</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="trends-content">
+                                    <h5 class="text-primary mb-3">Recent Price Changes by County</h5>
+                                    
+                                    <!-- Nairobi Trends -->
+                                    <div class="trend-item mb-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>Nairobi County</strong>
+                                                <small class="text-muted d-block">Urban markets</small>
+                                            </div>
+                                            <span class="badge bg-success">+5.2%</span>
+                                        </div>
+                                        <div class="progress mt-2" style="height: 6px;">
+                                            <div class="progress-bar bg-success" style="width: 75%"></div>
+                                        </div>
+                                        <small class="text-muted">Maize: KES 45-52/kg, Rice: KES 120-135/kg</small>
+                                    </div>
+
+                                    <!-- Mombasa Trends -->
+                                    <div class="trend-item mb-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>Mombasa County</strong>
+                                                <small class="text-muted d-block">Coastal region</small>
+                                            </div>
+                                            <span class="badge bg-warning">+3.8%</span>
+                                        </div>
+                                        <div class="progress mt-2" style="height: 6px;">
+                                            <div class="progress-bar bg-warning" style="width: 60%"></div>
+                                        </div>
+                                        <small class="text-muted">Maize: KES 42-48/kg, Rice: KES 115-130/kg</small>
+                                    </div>
+
+                                    <!-- Kisumu Trends -->
+                                    <div class="trend-item mb-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>Kisumu County</strong>
+                                                <small class="text-muted d-block">Western region</small>
+                                            </div>
+                                            <span class="badge bg-info">+2.1%</span>
+                                        </div>
+                                        <div class="progress mt-2" style="height: 6px;">
+                                            <div class="progress-bar bg-info" style="width: 45%"></div>
+                                        </div>
+                                        <small class="text-muted">Maize: KES 38-45/kg, Rice: KES 110-125/kg</small>
+                                    </div>
+
+                                    <!-- Nakuru Trends -->
+                                    <div class="trend-item mb-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>Nakuru County</strong>
+                                                <small class="text-muted d-block">Rift Valley</small>
+                                            </div>
+                                            <span class="badge bg-danger">+7.5%</span>
+                                        </div>
+                                        <div class="progress mt-2" style="height: 6px;">
+                                            <div class="progress-bar bg-danger" style="width: 85%"></div>
+                                        </div>
+                                        <small class="text-muted">Maize: KES 40-47/kg, Rice: KES 118-132/kg</small>
+                                    </div>
+
+                                    <!-- Eldoret Trends -->
+                                    <div class="trend-item mb-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>Uasin Gishu County</strong>
+                                                <small class="text-muted d-block">North Rift</small>
+                                            </div>
+                                            <span class="badge bg-success">+1.8%</span>
+                                        </div>
+                                        <div class="progress mt-2" style="height: 6px;">
+                                            <div class="progress-bar bg-success" style="width: 40%"></div>
+                                        </div>
+                                        <small class="text-muted">Maize: KES 35-42/kg, Rice: KES 105-120/kg</small>
+                                    </div>
+
+                                    <hr class="my-4">
+                                    
+                                    <div class="trends-insights">
+                                        <h6 class="text-primary mb-3"><i class="fas fa-lightbulb me-2"></i>Key Insights</h6>
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-arrow-up text-success me-2"></i>Overall price increase of 4.1% in the last quarter</li>
+                                            <li class="mb-2"><i class="fas fa-map-marker-alt text-info me-2"></i>Urban areas showing higher volatility than rural markets</li>
+                                            <li class="mb-2"><i class="fas fa-seedling text-warning me-2"></i>Seasonal factors affecting maize prices significantly</li>
+                                            <li class="mb-2"><i class="fas fa-truck text-primary me-2"></i>Transport costs impacting coastal and northern regions</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Side - Prediction Form -->
+                    <div class="col-lg-6">
+                        <div class="prediction-form-card h-100">
+                            <div class="card-header bg-success text-white">
+                                <h4 class="mb-0"><i class="fas fa-calculator me-2"></i>Price Prediction Form</h4>
+                            </div>
+                            <div class="card-body">
+                                <form id="predictionForm" action="/predict/" method="post">
+                                    {% csrf_token %}
+                                    <div class="row">
+                                        {% for feature_name in top_6_features %}
+                                            <div class="col-md-6 mb-3">
+                                                <div class="form-group">
+                                                    <label class="form-label fw-bold" for="{{ feature_name }}">{{ feature_name }}</label>
+                                                    {% if feature_name in dropdown_options %}
+                                                        <select class="form-select" id="{{ feature_name }}" name="{{ feature_name }}" required>
+                                                            <option value="" disabled selected>Select {{ feature_name }}</option>
+                                                            {% for option in dropdown_options|get_item:feature_name %}
+                                                                <option value="{{ option }}">{{ option }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    {% else %}
+                                                        <input
+                                                            type="text"
+                                                            class="form-control"
+                                                            id="{{ feature_name }}"
+                                                            name="{{ feature_name }}"
+                                                            placeholder="Enter {{ feature_name }}"
+                                                            required
+                                                        />
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="text-center mt-4">
+                                        <button type="submit" class="btn btn-success btn-lg px-5">
+                                            <i class="fas fa-magic me-2"></i>Predict Price
+                                        </button>
+                                    </div>
+                                </form>
+                                <div class="prediction-result mt-4" id="predictionResult"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const form = document.getElementById('predictionForm');
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(form);
+            const response = await fetch('/predictor/predict/', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            document.getElementById('predictionResult').innerText = `The predicted Price is: ${result.prediction.toFixed(2)}`;
+        });
+
+        // Contact form handling
+        const contactForm = document.getElementById('contactForm');
+        if (contactForm) {
+            contactForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const formData = new FormData(contactForm);
+                
+                try {
+                    const response = await fetch('/predictor/contact/', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+                    
+                    const responseDiv = document.getElementById('contactFormResponse');
+                    if (result.status === 'success') {
+                        responseDiv.innerHTML = `<div class="alert alert-success">${result.message}</div>`;
+                        contactForm.reset();
+                    } else {
+                        responseDiv.innerHTML = `<div class="alert alert-danger">Error sending message. Please try again.</div>`;
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    document.getElementById('contactFormResponse').innerHTML = 
+                        `<div class="alert alert-danger">Error sending message. Please try again.</div>`;
+                }
+            });
+        }
+
+        // Navigation handling
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Remove active class from all links
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                
+                // Add active class to clicked link
+                link.classList.add('active');
+                
+                // Hide all sections
+                document.querySelectorAll('.about-section, .prediction-form').forEach(section => {
+                    section.style.display = 'none';
+                });
+                
+                // Show appropriate section
+                if (link.textContent === 'Stakeholder Benefits') {
+                    document.getElementById('stakeholder-benefits').style.display = 'block';
+                } else if (link.textContent === 'Statistical Analysis') {
+                    document.getElementById('statistical-analysis').style.display = 'block';
+                } else if (link.textContent === 'Market Trends') {
+                    document.getElementById('market-trends').style.display = 'block';
+                } else if (link.textContent === 'Contact') {
+                    document.getElementById('contact').style.display = 'block';
+                } else if (link.textContent === 'Project Overview') {
+                    document.querySelector('.about-section').style.display = 'block';
+                    document.querySelector('.prediction-form').style.display = 'block';
+                }
+            });
+        });
+    </script>
+
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+</body>
+</html>

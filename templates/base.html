@@ -1,0 +1,176 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Food Price Predictor{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        .navbar {
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%) !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .navbar-brand, .nav-link {
+            color: white !important;
+        }
+        .nav-link:hover {
+            color: #e3f2fd !important;
+        }
+        .nav-link.active {
+            color: #e3f2fd !important;
+            border-bottom: 2px solid #e3f2fd;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">Food Price Predictor{% if request.session.lang == 'sw' %} (Kiswahili){% endif %}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">{% if request.session.lang == 'sw' %}Nyumbani{% else %}Home{% endif %}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'make_prediction' %}">{% if request.session.lang == 'sw' %}Tabiri Bei{% else %}Predict Price{% endif %}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'contact' %}">{% if request.session.lang == 'sw' %}Mawasiliano{% else %}Contact{% endif %}</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item dropdown ms-3">
+                        <a class="nav-link dropdown-toggle" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="fi fi-ke"></span> Language
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="langDropdown">
+                            <li>
+                                <form method="post" action="{% url 'set_language' %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="language" value="en">
+                                    <button type="submit" class="dropdown-item">English</button>
+                                </form>
+                            </li>
+                            <li>
+                                <form method="post" action="{% url 'set_language' %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="language" value="sw">
+                                    <button type="submit" class="dropdown-item">Kiswahili</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-light text-center text-lg-start mt-5">
+        <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
+            © 2025 Food Price Predictor
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+
+    <!-- Chatbot Widget -->
+    <div id="chatbot-widget" style="position: fixed; bottom: 30px; right: 30px; z-index: 9999;">
+        <div id="chatbot-icon" style="background: #3498db; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); cursor: pointer;">
+            <span style="font-size: 2rem; color: #fff;">💬</span>
+        </div>
+        <div id="chatbot-window" style="display: none; width: 350px; height: 450px; background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.18); position: absolute; bottom: 70px; right: 0; flex-direction: column; overflow: hidden;">
+            <div style="background: #3498db; color: #fff; padding: 12px 16px; font-weight: bold;">Ask Food Price Chatbot <span id='chatbot-close' style='float:right; cursor:pointer;'>&times;</span></div>
+            <div id="chatbot-messages" style="flex: 1; padding: 12px; overflow-y: auto; height: 320px;"></div>
+            <form id="chatbot-form" style="display: flex; border-top: 1px solid #eee;">
+                <input id="chatbot-input" type="text" placeholder="Ask a question..." style="flex: 1; border: none; padding: 10px; outline: none;">
+                <button type="submit" style="background: #3498db; color: #fff; border: none; padding: 0 18px;">Send</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        const chatbotIcon = document.getElementById('chatbot-icon');
+        const chatbotWindow = document.getElementById('chatbot-window');
+        const chatbotClose = document.getElementById('chatbot-close');
+        const chatbotForm = document.getElementById('chatbot-form');
+        const chatbotInput = document.getElementById('chatbot-input');
+        const chatbotMessages = document.getElementById('chatbot-messages');
+
+        chatbotIcon.onclick = () => chatbotWindow.style.display = 'flex';
+        chatbotClose.onclick = () => chatbotWindow.style.display = 'none';
+
+        chatbotForm.onsubmit = async function(e) {
+            e.preventDefault();
+            const question = chatbotInput.value.trim();
+            if (!question) return;
+            appendMessage('You', question);
+            chatbotInput.value = '';
+            appendMessage('Bot', '<span style="color:#aaa">Thinking...</span>');
+            try {
+                const response = await fetch('/predictor/api/chatbot/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+                const data = await response.json();
+                chatbotMessages.lastChild.innerHTML = data.answer || data.error || 'No answer.';
+            } catch (err) {
+                chatbotMessages.lastChild.innerHTML = 'Error connecting to chatbot.';
+            }
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        };
+
+        function appendMessage(sender, text) {
+            const msg = document.createElement('div');
+            msg.innerHTML = `<strong>${sender}:</strong> ${text}`;
+            msg.style.margin = '8px 0';
+            chatbotMessages.appendChild(msg);
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html> 
