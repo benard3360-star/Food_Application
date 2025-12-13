@@ -50,7 +50,7 @@ Thumbs.db
 __pycache__/
 db.sqlite3
 .env
-*.pkl
+# *.pkl - commented out to allow ML model files
 *.log
 *.sqlite3
 /staticfiles/
