@@ -66,10 +66,18 @@ def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        remember_me = request.POST.get('remember_me')
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
             login(request, user)
+            
+            # Set session expiry based on remember me
+            if remember_me:
+                request.session.set_expiry(86400 * 30)  # 30 days
+            else:
+                request.session.set_expiry(86400 * 7)   # 7 days
+            
             messages.success(request, 'Login successful!')
             return redirect('home')
         else:
