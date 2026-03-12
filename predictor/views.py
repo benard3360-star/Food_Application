@@ -950,21 +950,29 @@ def data_analysis(request):
     df_columns = []
     error_message = None
 
-    # Per-user cached dataset path
-    cache_dir = os.path.join(settings.MEDIA_ROOT, "data_analysis")
-    os.makedirs(cache_dir, exist_ok=True)
-    cache_path = os.path.join(cache_dir, f"user_{request.user.id}.csv")
+    # Only use server-side file cache in development (local) where disk is reliable.
+    # On Render free tier (no persistent disk), we process uploads in-memory instead.
+    use_file_cache = settings.DEBUG
+    cache_path = None
+    if use_file_cache:
+        cache_dir = os.path.join(settings.MEDIA_ROOT, "data_analysis")
+        os.makedirs(cache_dir, exist_ok=True)
+        cache_path = os.path.join(cache_dir, f"user_{request.user.id}.csv")
 
     if request.method == "POST" and request.FILES.get("dataset"):
         uploaded_file = request.FILES["dataset"]
         try:
-            # Save uploaded file to per-user cache location
-            with open(cache_path, "wb+") as destination:
-                for chunk in uploaded_file.chunks():
-                    destination.write(chunk)
+            if use_file_cache and cache_path:
+                # Save uploaded file to per-user cache location (local dev only)
+                with open(cache_path, "wb+") as destination:
+                    for chunk in uploaded_file.chunks():
+                        destination.write(chunk)
+                # Read CSV from cached file
+                df4 = pd.read_csv(cache_path)
+            else:
+                # Production / Render: read directly from uploaded file in-memory
+                df4 = pd.read_csv(uploaded_file)
 
-            # Attempt to read as CSV from cached file.
-            df4 = pd.read_csv(cache_path)
             df_columns = list(df4.columns)
             plots = _run_data_analysis(df4)
             if not plots:
@@ -975,8 +983,8 @@ def data_analysis(request):
         except Exception as e:
             error_message = f"Error processing dataset: {str(e)}"
     elif request.method == "POST":
-        # No new file provided; fall back to cached dataset if available
-        if os.path.exists(cache_path):
+        # No new file provided; in dev we can fall back to cached dataset if available
+        if use_file_cache and cache_path and os.path.exists(cache_path):
             try:
                 df4 = pd.read_csv(cache_path)
                 df_columns = list(df4.columns)
@@ -991,8 +999,8 @@ def data_analysis(request):
         else:
             error_message = "Please select a CSV file to upload."
     else:
-        # GET request: if a cached dataset exists, load and analyze it automatically
-        if os.path.exists(cache_path):
+        # GET request: in dev, if a cached dataset exists, load and analyze it automatically
+        if use_file_cache and cache_path and os.path.exists(cache_path):
             try:
                 df4 = pd.read_csv(cache_path)
                 df_columns = list(df4.columns)
