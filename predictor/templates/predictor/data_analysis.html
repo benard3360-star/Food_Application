@@ -32,14 +32,6 @@
                     {{ error_message }}
                 </div>
             {% endif %}
-            {% if df_columns %}
-                <div class="mt-3">
-                    <strong>Detected columns:</strong>
-                    {% for col in df_columns %}
-                        <span class="badge bg-secondary me-1" style="font-size: 0.85rem;">{{ col }}</span>
-                    {% endfor %}
-                </div>
-            {% endif %}
         </div>
     </div>
 
