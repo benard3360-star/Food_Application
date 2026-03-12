@@ -58,6 +58,9 @@
                         <a class="nav-link" href="{% url 'make_prediction' %}">{% if request.session.lang == 'sw' %}Tabiri Bei{% else %}Predict Price{% endif %}</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'data_analysis' %}">Data Analysis</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{% url 'contact' %}">{% if request.session.lang == 'sw' %}Mawasiliano{% else %}Contact{% endif %}</a>
                     </li>
                     {% if user.is_authenticated %}

@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Data Analysis - Food Price Predictor{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Data Analysis</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Upload Dataset (CSV)</h5>
+            <p class="card-text">
+                Upload a CSV file with columns such as
+                <code>Day Name</code>, <code>Month</code>, <code>Region</code>,
+                <code>County</code>, <code>Market</code>, <code>Commodity Category</code>,
+                <code>Commodity</code>, <code>Priceflag</code>, <code>Pricetype</code>,
+                <code>Day_Classification</code>, <code>Currency(USD)</code>, and
+                <code>Price (Ksh)</code> to generate the predefined analyses and plots.
+            </p>
+            <form method="post" enctype="multipart/form-data" class="row g-3">
+                {% csrf_token %}
+                <div class="col-md-8">
+                    <input type="file" name="dataset" accept=".csv" class="form-control" required>
+                </div>
+                <div class="col-md-4 d-grid">
+                    <button type="submit" class="btn btn-primary">Run Analysis</button>
+                </div>
+            </form>
+            {% if error_message %}
+                <div class="alert alert-danger mt-3">
+                    {{ error_message }}
+                </div>
+            {% endif %}
+            {% if df_columns %}
+                <div class="mt-3">
+                    <strong>Detected columns:</strong>
+                    {% for col in df_columns %}
+                        <span class="badge bg-secondary me-1" style="font-size: 0.85rem;">{{ col }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if plots %}
+        <div class="row">
+            {% if plots.avg_price_per_day_name %}
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Average Price per Day</h5>
+                        <img src="{{ plots.avg_price_per_day_name }}" alt="Average Price per Day"
+                             class="img-fluid">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if plots.avg_price_per_month %}
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Average Price per Month</h5>
+                        <img src="{{ plots.avg_price_per_month }}" alt="Average Price per Month"
+                             class="img-fluid">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if plots.categorical_counts %}
+            <div class="col-12 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Categorical Distributions</h5>
+                        <img src="{{ plots.categorical_counts }}" alt="Categorical Distributions"
+                             class="img-fluid">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if plots.total_price_by_day_classification %}
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Price by Day Classification</h5>
+                        <img src="{{ plots.total_price_by_day_classification }}"
+                             alt="Total Price by Day Classification"
+                             class="img-fluid">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if plots.category_county_price %}
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Average Price by Commodity Category Across Counties</h5>
+                        <img src="{{ plots.category_county_price }}"
+                             alt="Average Price by Commodity Category Across Counties"
+                             class="img-fluid">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if plots.currency_impact_top10 %}
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Top Commodities Affected by Currency Fluctuations</h5>
+                        <img src="{{ plots.currency_impact_top10 }}"
+                             alt="Top Commodities Affected by Currency Fluctuations"
+                             class="img-fluid">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if plots.top_selling_per_region %}
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Top-Selling Commodity in the Best Market Per Region</h5>
+                        <img src="{{ plots.top_selling_per_region }}"
+                             alt="Top-Selling Commodity in the Best Market Per Region"
+                             class="img-fluid">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

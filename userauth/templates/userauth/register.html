@@ -1,393 +1,369 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Food Price Predictor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .registration-wrapper {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 2rem 1rem;
         }
-        
-        .register-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            max-width: 900px;
-            width: 100%;
-            display: flex;
-            min-height: 600px;
-        }
-        
-        .register-left {
-            flex: 1;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        
-        .register-right {
-            flex: 1;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .register-right::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1.5" fill="rgba(255,255,255,0.08)"/><circle cx="50" cy="10" r="1" fill="rgba(255,255,255,0.06)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
-            opacity: 0.3;
-            animation: float 20s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
-        }
-        
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .logo i {
-            font-size: 3rem;
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-        
-        .logo h2 {
-            color: #333;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        
-        .logo p {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-            position: relative;
-        }
-        
-        .form-control {
-            border: 2px solid #e1e5e9;
-            border-radius: 12px;
-            padding: 15px 20px 15px 50px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
-        }
-        
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+
+        .registration-container {
             background: white;
-            outline: none;
-        }
-        
-        .form-control.is-invalid {
-            border-color: #dc3545;
-        }
-        
-        .form-control.is-valid {
-            border-color: #28a745;
-        }
-        
-        .input-icon {
-            position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #667eea;
-            font-size: 18px;
-            z-index: 2;
-        }
-        
-        .form-label {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-        
-        .btn-register {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 12px;
-            padding: 15px;
-            font-weight: 600;
-            font-size: 16px;
-            color: white;
-            transition: all 0.3s ease;
-            position: relative;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            max-width: 480px;
+            width: 100%;
             overflow: hidden;
         }
-        
-        .btn-register:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+
+        .registration-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
             color: white;
+            padding: 2rem;
+            text-align: center;
         }
-        
-        .btn-register:active {
-            transform: translateY(0);
+
+        .registration-header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
         }
-        
-        .password-strength {
-            margin-top: 5px;
-            font-size: 12px;
+
+        .registration-header p {
+            opacity: 0.9;
+            font-size: 0.875rem;
         }
-        
-        .strength-bar {
-            height: 4px;
-            border-radius: 2px;
-            margin-top: 5px;
-            transition: all 0.3s ease;
+
+        .registration-body {
+            padding: 2rem;
         }
-        
-        .strength-weak { background: #dc3545; width: 33%; }
-        .strength-medium { background: #ffc107; width: 66%; }
-        .strength-strong { background: #28a745; width: 100%; }
-        
-        .feature-list {
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            background-color: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-control.is-valid {
+            border-color: var(--success-color);
+        }
+
+        .form-control.is-invalid {
+            border-color: var(--danger-color);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .input-group .form-control:first-child {
+            flex: 0 0 120px;
+        }
+
+        .input-group .form-control:last-child {
+            flex: 1;
+        }
+
+        .password-requirements {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .password-requirements ul {
             list-style: none;
             padding: 0;
+            margin: 0.25rem 0 0 0;
         }
-        
-        .feature-list li {
-            padding: 10px 0;
+
+        .password-requirements li {
             display: flex;
             align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
         }
-        
-        .feature-list i {
-            margin-right: 15px;
-            font-size: 20px;
-            opacity: 0.8;
+
+        .password-requirements .check {
+            color: var(--success-color);
         }
-        
+
+        .password-requirements .times {
+            color: var(--danger-color);
+        }
+
+        .form-check {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-check-input {
+            margin: 0;
+            flex-shrink: 0;
+        }
+
+        .form-check-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .form-check-label a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .form-check-label a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            padding: 0.875rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: white;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            background-color: var(--secondary-color);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: var(--border-color);
+            z-index: 1;
+        }
+
+        .divider span {
+            background-color: white;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 2;
+        }
+
         .login-link {
             text-align: center;
-            margin-top: 20px;
-            color: #666;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
         }
-        
+
         .login-link a {
-            color: #667eea;
+            color: var(--primary-color);
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 500;
         }
-        
+
         .login-link a:hover {
             text-decoration: underline;
         }
-        
+
         .error-message {
-            color: #dc3545;
-            font-size: 12px;
-            margin-top: 5px;
+            color: var(--danger-color);
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
         }
-        
+
         .success-message {
-            color: #28a745;
-            font-size: 12px;
-            margin-top: 5px;
+            color: var(--success-color);
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
         }
-        
-        @media (max-width: 768px) {
-            .register-container {
+
+        @media (max-width: 640px) {
+            .registration-wrapper {
+                padding: 1rem;
+            }
+            
+            .registration-header,
+            .registration-body {
+                padding: 1.5rem;
+            }
+            
+            .input-group {
                 flex-direction: column;
-                margin: 10px;
             }
             
-            .register-right {
-                order: -1;
-                min-height: 200px;
-            }
-            
-            .register-left {
-                padding: 30px 20px;
+            .input-group .form-control:first-child {
+                flex: none;
             }
         }
     </style>
 </head>
 <body>
-    <div class="register-container">
-        <div class="register-left">
-            <div class="logo">
-                <i class="fas fa-seedling"></i>
-                <h2>Create Account</h2>
-                <p>Join the Food Price Predictor community</p>
+    <div class="registration-wrapper">
+        <div class="registration-container">
+            <div class="registration-header">
+                <h1>Create Account</h1>
+                <p>Join Food Price Predictor to access market insights and predictions</p>
             </div>
             
-            <form method="post" id="registerForm" novalidate>
-                {% csrf_token %}
-                
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="form-label">First Name</label>
-                            <div class="position-relative">
-                                <input type="text" class="form-control" name="first_name" placeholder="Enter your first name" required>
-                                <i class="fas fa-user input-icon"></i>
-                            </div>
+            <div class="registration-body">
+                <form method="post" id="registrationForm" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="first_name">First Name *</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" required>
+                        <div class="error-message" id="first_name_error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="last_name">Last Name *</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" required>
+                        <div class="error-message" id="last_name_error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username *</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                        <div class="error-message" id="username_error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address *</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                        <div class="error-message" id="email_error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Phone Number *</label>
+                        <div class="input-group">
+                            <select class="form-control" name="country_code" required>
+                                <option value="+254">🇰🇪 +254</option>
+                                <option value="+255">🇹🇿 +255</option>
+                                <option value="+256">🇺🇬 +256</option>
+                                <option value="+1">🇺🇸 +1</option>
+                                <option value="+44">🇬🇧 +44</option>
+                            </select>
+                            <input type="tel" class="form-control" name="phone_number" placeholder="742423200" required>
                         </div>
+                        <div class="error-message" id="phone_error"></div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="form-label">Last Name</label>
-                            <div class="position-relative">
-                                <input type="text" class="form-control" name="last_name" placeholder="Enter your last name" required>
-                                <i class="fas fa-user input-icon"></i>
-                            </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="password1">Password *</label>
+                        <input type="password" class="form-control" id="password1" name="password1" required>
+                        <div class="password-requirements">
+                            <small>Password must contain:</small>
+                            <ul id="password_requirements">
+                                <li id="length_req"><i class="fas fa-times times"></i> At least 8 characters</li>
+                                <li id="uppercase_req"><i class="fas fa-times times"></i> One uppercase letter</li>
+                                <li id="lowercase_req"><i class="fas fa-times times"></i> One lowercase letter</li>
+                                <li id="number_req"><i class="fas fa-times times"></i> One number</li>
+                            </ul>
                         </div>
+                        <div class="error-message" id="password1_error"></div>
                     </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Username</label>
-                    <div class="position-relative">
-                        <input type="text" class="form-control" name="username" placeholder="Choose a username" required>
-                        <i class="fas fa-at input-icon"></i>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="password2">Confirm Password *</label>
+                        <input type="password" class="form-control" id="password2" name="password2" required>
+                        <div class="error-message" id="password2_error"></div>
+                        <div class="success-message" id="password2_success"></div>
                     </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Email Address</label>
-                    <div class="position-relative">
-                        <input type="email" class="form-control" name="email" placeholder="Enter your email" required>
-                        <i class="fas fa-envelope input-icon"></i>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="form-label">Country Code</label>
-                            <div class="position-relative">
-                                <select class="form-control" name="country_code" required>
-                                    <option value="+254">🇰🇪 +254</option>
-                                    <option value="+255">🇹🇿 +255</option>
-                                    <option value="+256">🇺🇬 +256</option>
-                                    <option value="+1">🇺🇸 +1</option>
-                                </select>
-                                <i class="fas fa-flag input-icon"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="form-group">
-                            <label class="form-label">Phone Number</label>
-                            <div class="position-relative">
-                                <input type="tel" class="form-control" name="phone_number" placeholder="742423200" required>
-                                <i class="fas fa-phone input-icon"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <div class="position-relative">
-                        <input type="password" class="form-control" name="password1" placeholder="Create a strong password" required id="password1">
-                        <i class="fas fa-lock input-icon"></i>
-                    </div>
-                    <div class="password-strength">
-                        <div class="strength-bar" id="strengthBar"></div>
-                        <small id="strengthText">Password strength will appear here</small>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Confirm Password</label>
-                    <div class="position-relative">
-                        <input type="password" class="form-control" name="password2" placeholder="Confirm your password" required id="password2">
-                        <i class="fas fa-lock input-icon"></i>
-                    </div>
-                    <div id="passwordMatch"></div>
-                </div>
-                
-                <div class="form-group">
+                    
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="terms" required>
+                        <input type="checkbox" class="form-check-input" id="terms" required>
                         <label class="form-check-label" for="terms">
-                            I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>
+                            I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>
                         </label>
                     </div>
-                </div>
-                
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-register">
-                        <i class="fas fa-user-plus me-2"></i>Create Account
+                    
+                    <button type="submit" class="btn-primary" id="submit_btn">
+                        Create Account
                     </button>
+                </form>
+                
+                <div class="divider">
+                    <span>Already have an account?</span>
                 </div>
-            </form>
-            
-            <div class="login-link">
-                <p>Already have an account? <a href="{% url 'login' %}">Sign In</a></p>
-            </div>
-        </div>
-        
-        <div class="register-right">
-            <div style="position: relative; z-index: 1;">
-                <h2 class="mb-4">Welcome to Food Price Predictor</h2>
-                <p class="mb-4">Join thousands of farmers, traders, and consumers who trust our AI-powered predictions for smarter decisions.</p>
                 
-                <ul class="feature-list">
-                    <li>
-                        <i class="fas fa-chart-line"></i>
-                        <span>Accurate price predictions using machine learning</span>
-                    </li>
-                    <li>
-                        <i class="fas fa-mobile-alt"></i>
-                        <span>Real-time notifications via SMS and email</span>
-                    </li>
-                    <li>
-                        <i class="fas fa-users"></i>
-                        <span>Community-driven market reporting</span>
-                    </li>
-                    <li>
-                        <i class="fas fa-shield-alt"></i>
-                        <span>Secure and reliable platform</span>
-                    </li>
-                </ul>
-                
-                <div class="mt-4">
-                    <small style="opacity: 0.8;">
-                        <i class="fas fa-lock me-2"></i>
-                        Your data is encrypted and secure
-                    </small>
+                <div class="login-link">
+                    <a href="{% url 'login' %}">Sign in to your account</a>
                 </div>
             </div>
         </div>
@@ -395,61 +371,81 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Password strength checker
-        document.getElementById('password1').addEventListener('input', function() {
+        // Form validation
+        const form = document.getElementById('registrationForm');
+        const submitBtn = document.getElementById('submit_btn');
+        
+        // Password validation
+        const password1 = document.getElementById('password1');
+        const password2 = document.getElementById('password2');
+        
+        password1.addEventListener('input', function() {
             const password = this.value;
-            const strengthBar = document.getElementById('strengthBar');
-            const strengthText = document.getElementById('strengthText');
             
-            let strength = 0;
-            if (password.length >= 8) strength++;
-            if (/[A-Z]/.test(password)) strength++;
-            if (/[0-9]/.test(password)) strength++;
-            if (/[^A-Za-z0-9]/.test(password)) strength++;
-            
-            strengthBar.className = 'strength-bar';
-            if (strength <= 1) {
-                strengthBar.classList.add('strength-weak');
-                strengthText.textContent = 'Weak password';
-                strengthText.style.color = '#dc3545';
-            } else if (strength <= 2) {
-                strengthBar.classList.add('strength-medium');
-                strengthText.textContent = 'Medium strength';
-                strengthText.style.color = '#ffc107';
+            // Length check
+            const lengthReq = document.getElementById('length_req');
+            if (password.length >= 8) {
+                lengthReq.innerHTML = '<i class="fas fa-check check"></i> At least 8 characters';
             } else {
-                strengthBar.classList.add('strength-strong');
-                strengthText.textContent = 'Strong password';
-                strengthText.style.color = '#28a745';
+                lengthReq.innerHTML = '<i class="fas fa-times times"></i> At least 8 characters';
+            }
+            
+            // Uppercase check
+            const uppercaseReq = document.getElementById('uppercase_req');
+            if (/[A-Z]/.test(password)) {
+                uppercaseReq.innerHTML = '<i class="fas fa-check check"></i> One uppercase letter';
+            } else {
+                uppercaseReq.innerHTML = '<i class="fas fa-times times"></i> One uppercase letter';
+            }
+            
+            // Lowercase check
+            const lowercaseReq = document.getElementById('lowercase_req');
+            if (/[a-z]/.test(password)) {
+                lowercaseReq.innerHTML = '<i class="fas fa-check check"></i> One lowercase letter';
+            } else {
+                lowercaseReq.innerHTML = '<i class="fas fa-times times"></i> One lowercase letter';
+            }
+            
+            // Number check
+            const numberReq = document.getElementById('number_req');
+            if (/[0-9]/.test(password)) {
+                numberReq.innerHTML = '<i class="fas fa-check check"></i> One number';
+            } else {
+                numberReq.innerHTML = '<i class="fas fa-times times"></i> One number';
             }
         });
         
-        // Password match checker
-        document.getElementById('password2').addEventListener('input', function() {
-            const password1 = document.getElementById('password1').value;
-            const password2 = this.value;
-            const matchDiv = document.getElementById('passwordMatch');
+        // Password confirmation
+        password2.addEventListener('input', function() {
+            const password1Value = password1.value;
+            const password2Value = this.value;
+            const errorDiv = document.getElementById('password2_error');
+            const successDiv = document.getElementById('password2_success');
             
-            if (password2 && password1 !== password2) {
-                matchDiv.innerHTML = '<small class="error-message"><i class="fas fa-times me-1"></i>Passwords do not match</small>';
+            if (password2Value && password1Value !== password2Value) {
+                errorDiv.textContent = 'Passwords do not match';
+                successDiv.textContent = '';
                 this.classList.add('is-invalid');
-            } else if (password2 && password1 === password2) {
-                matchDiv.innerHTML = '<small class="success-message"><i class="fas fa-check me-1"></i>Passwords match</small>';
+                this.classList.remove('is-valid');
+            } else if (password2Value && password1Value === password2Value) {
+                errorDiv.textContent = '';
+                successDiv.textContent = 'Passwords match';
                 this.classList.remove('is-invalid');
                 this.classList.add('is-valid');
             } else {
-                matchDiv.innerHTML = '';
+                errorDiv.textContent = '';
+                successDiv.textContent = '';
                 this.classList.remove('is-invalid', 'is-valid');
             }
         });
         
         // Form submission
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            const button = e.target.querySelector('button[type="submit"]');
-            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Account...';
-            button.disabled = true;
+        form.addEventListener('submit', function(e) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+            submitBtn.disabled = true;
         });
         
-        // Real-time validation
+        // Real-time validation for required fields
         document.querySelectorAll('input[required]').forEach(input => {
             input.addEventListener('blur', function() {
                 if (this.value.trim()) {

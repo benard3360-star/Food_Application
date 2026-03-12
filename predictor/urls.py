@@ -21,6 +21,7 @@ def log_url_patterns():
 urlpatterns = [
     path('', views.home, name='home'),  # This will serve food5.html at the root URL
     path('market-trends/', views.market_trends, name='market_trends'),
+    path('data-analysis/', views.data_analysis, name='data_analysis'),
     path('contact/', views.contact_view, name='contact'),
     path('predict/', views.make_prediction, name='make_prediction'),
     path('download-predictions/', views.download_predictions, name='download_predictions'),

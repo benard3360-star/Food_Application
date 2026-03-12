@@ -27,6 +27,13 @@ from decouple import config
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils import timezone
 import pytz
+import pandas as pd
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import seaborn as sns
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -169,6 +176,270 @@ def home(request):
 def market_trends(request):
     """Market trends view"""
     return render(request, 'predictor/market_trends.html')
+
+
+def _figure_to_data_uri(fig, dpi=300):
+    """Convert a Matplotlib figure to a base64 data URI for embedding in HTML."""
+    buffer = io.BytesIO()
+    fig.savefig(buffer, format="png", dpi=dpi, bbox_inches="tight")
+    buffer.seek(0)
+    image_png = buffer.getvalue()
+    buffer.close()
+    plt.close(fig)
+    encoded = base64.b64encode(image_png).decode("utf-8")
+    return f"data:image/png;base64,{encoded}"
+
+
+def _run_data_analysis(df4):
+    """
+    Run exploratory data analysis on the uploaded dataframe.
+    Returns a dict of plot data URIs keyed by plot name.
+    """
+    plots = {}
+
+    # 1. Average Price per Day Name
+    if {"Day Name", "Price (Ksh)"} <= set(df4.columns):
+        day_avg = (
+            df4.groupby("Day Name")["Price (Ksh)"]
+            .mean()
+            .sort_values()
+        )
+        fig, ax = plt.subplots(figsize=(10, 5))
+        day_avg.plot(kind="bar", ax=ax)
+        ax.set_title("Average Price per Day")
+        ax.set_ylabel("Price (Ksh)")
+        ax.set_xlabel("Day Name")
+        plots["avg_price_per_day_name"] = _figure_to_data_uri(fig)
+
+    # 2. Average Price per Month (line plot)
+    if {"Month", "Price (Ksh)"} <= set(df4.columns):
+        monthly_avg = df4.groupby("Month")["Price (Ksh)"].mean()
+        fig, ax = plt.subplots(figsize=(10, 5), dpi=150)
+        ax.plot(
+            monthly_avg.index,
+            monthly_avg.values,
+            marker="o",
+            linewidth=2.0,
+            color="teal",
+        )
+        ax.set_title("Average Price per Month", fontsize=14, fontweight="bold")
+        ax.set_xlabel("Month", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Average Price (Ksh)", fontsize=12, fontweight="bold")
+        months_sorted = sorted(df4["Month"].unique())
+        ax.set_xticks(months_sorted)
+        ax.set_xticklabels(months_sorted)
+        ax.grid(True)
+        plots["avg_price_per_month"] = _figure_to_data_uri(fig)
+
+    # 3. Count plots for categorical columns
+    categorical_columns = [
+        "Region",
+        "County",
+        "Market",
+        "Commodity Category",
+        "Commodity",
+        "Priceflag",
+        "Pricetype",
+    ]
+    available_columns = [col for col in categorical_columns if col in df4.columns]
+    if available_columns:
+        num_columns = 3
+        num_rows = -(-len(available_columns) // num_columns)
+        fig, axes = plt.subplots(num_rows, num_columns, figsize=(20, 16))
+        axes = axes.ravel()
+
+        for i, col in enumerate(available_columns):
+            top_cats = df4[col].value_counts().head(10).index
+            sampled_df = df4[df4[col].isin(top_cats)]
+            sns.countplot(
+                x=sampled_df[col],
+                palette="bright",
+                ax=axes[i],
+                saturation=0.95,
+            )
+            if axes[i].containers:
+                axes[i].bar_label(
+                    axes[i].containers[0],
+                    color="black",
+                    size=10,
+                    label_type="center",
+                    padding=2,
+                )
+            axes[i].set_title(f"Count Plot of {col.capitalize()}", pad=15)
+            axes[i].set_xlabel(col.capitalize())
+            axes[i].set_ylabel("Count")
+            axes[i].tick_params(axis="x", rotation=45)
+
+            if col in ["Market", "Commodity"]:
+                axes[i].set_xticklabels(
+                    [
+                        (
+                            t.get_text()[:10] + "..."
+                            if len(t.get_text()) > 10
+                            else t.get_text()
+                        )
+                        for t in axes[i].get_xticklabels()
+                    ]
+                )
+            elif col == "Commodity Category":
+                axes[i].set_xticks(range(len(top_cats)))
+                axes[i].set_xticklabels(top_cats, rotation=45, ha="center")
+
+        # Remove unused subplots
+        for j in range(len(available_columns), len(axes)):
+            fig.delaxes(axes[j])
+
+        fig.tight_layout()
+        plots["categorical_counts"] = _figure_to_data_uri(fig)
+
+    # 4. Total Price by Day Classification
+    if {"Day_Classification", "Price (Ksh)"} <= set(df4.columns):
+        total_price_per_day = df4.groupby("Day_Classification")["Price (Ksh)"].sum()
+        fig, ax = plt.subplots(figsize=(8, 5), dpi=300)
+        total_price_per_day.plot(kind="bar", color=["blue", "orange"], ax=ax)
+        ax.set_title("Total Price by Day Classification", fontweight="bold")
+        ax.set_ylabel("Total Price (Ksh)", fontweight="bold")
+        ax.set_xlabel("Day Classification", fontweight="bold")
+        ax.tick_params(axis="x", rotation=0)
+        for p in ax.patches:
+            value = p.get_height()
+            ax.annotate(
+                f"{value:,.2f}",
+                (p.get_x() + p.get_width() / 2, value),
+                ha="center",
+                va="bottom",
+                fontsize=10,
+                fontweight="bold",
+            )
+        plots["total_price_by_day_classification"] = _figure_to_data_uri(fig)
+
+    # 5. Average Price by Commodity Category Across Counties
+    if {"County", "Commodity Category", "Price (Ksh)"} <= set(df4.columns):
+        category_county = (
+            df4.groupby(["County", "Commodity Category"])["Price (Ksh)"]
+            .mean()
+            .unstack()
+        )
+        high_price_counties = category_county.mean(axis=1) > 2000
+        filtered_category_county = category_county[high_price_counties]
+        if not filtered_category_county.empty:
+            fig, ax = plt.subplots(figsize=(15, 6), dpi=300)
+            filtered_category_county.plot(kind="bar", stacked=True, ax=ax)
+            ax.set_title(
+                "Average Price by Commodity Category Across Counties",
+                fontweight="bold",
+            )
+            ax.set_ylabel("Price (Ksh)", fontweight="bold")
+            ax.set_xlabel("County", fontweight="bold")
+            ax.tick_params(axis="x", rotation=90, labelsize=8)
+            legend = ax.legend(
+                title="Commodity Category",
+                bbox_to_anchor=(1.05, 1),
+                loc="upper left",
+            )
+            legend.get_title().set_fontweight("bold")
+            plots["category_county_price"] = _figure_to_data_uri(fig)
+
+    # 6. Correlation between Price and Currency(USD) per Commodity
+    if {"Commodity", "Price (Ksh)", "Currency(USD)"} <= set(df4.columns):
+        currency_corr = (
+            df4.groupby("Commodity")[["Price (Ksh)", "Currency(USD)"]].corr().unstack()
+        )
+        correlation_values = currency_corr["Currency(USD)"]["Price (Ksh)"]
+        top_currency_impact = (
+            correlation_values.dropna()
+            .abs()
+            .sort_values(ascending=False)
+            .head(10)
+        )
+        if not top_currency_impact.empty:
+            fig, ax = plt.subplots(figsize=(10, 5), dpi=300)
+            sns.barplot(
+                x=top_currency_impact.values,
+                y=top_currency_impact.index,
+                palette="coolwarm",
+                ax=ax,
+            )
+            ax.set_title(
+                "Top commodities affected by Currency Fluctuations",
+                fontsize=14,
+                fontweight="bold",
+            )
+            ax.set_xlabel(
+                "Absolute Correlation with Exchange Rate",
+                fontsize=12,
+                fontweight="bold",
+            )
+            ax.set_ylabel("Commodity", fontsize=12, fontweight="bold")
+            ax.grid(axis="x", linestyle="--", alpha=0.7)
+            plots["currency_impact_top10"] = _figure_to_data_uri(fig)
+
+    # 7. Top-selling commodity in the best market per region
+    if {"Region", "Market", "Commodity", "Price (Ksh)"} <= set(df4.columns):
+        top_selling_per_market = (
+            df4.groupby(["Region", "Market", "Commodity"])["Price (Ksh)"]
+            .sum()
+            .reset_index()
+        )
+        top_market_per_region = (
+            top_selling_per_market.sort_values(
+                ["Region", "Price (Ksh)"], ascending=[True, False]
+            )
+            .groupby("Region")
+            .first()
+            .reset_index()
+        )
+        if not top_market_per_region.empty:
+            fig, ax = plt.subplots(figsize=(12, 6))
+            sns.barplot(
+                data=top_market_per_region,
+                x="Region",
+                y="Price (Ksh)",
+                hue="Commodity",
+                dodge=False,
+                palette="viridis",
+                ax=ax,
+            )
+            for p, commodity, market in zip(
+                ax.patches,
+                top_market_per_region["Commodity"],
+                top_market_per_region["Market"],
+            ):
+                ax.annotate(
+                    f"{market}",
+                    (
+                        p.get_x() + p.get_width() / 2,
+                        p.get_height() + 5000,
+                    ),
+                    ha="center",
+                    va="bottom",
+                    fontsize=11,
+                    fontweight="bold",
+                    color="black",
+                )
+                ax.annotate(
+                    f"{commodity}",
+                    (
+                        p.get_x() + p.get_width() / 2,
+                        p.get_height() / 2,
+                    ),
+                    ha="center",
+                    va="center",
+                    fontsize=10,
+                    fontweight="bold",
+                    color="white",
+                )
+
+            ax.set_title("Top-Selling Commodity in the Best Market Per Region")
+            ax.set_xlabel("Region")
+            ax.set_ylabel("Total Sales (Ksh)")
+            ax.tick_params(axis="x", rotation=45)
+            ax.legend(
+                title="Commodity", bbox_to_anchor=(1.05, 1), loc="upper left"
+            )
+            plots["top_selling_per_region"] = _figure_to_data_uri(fig)
+
+    return plots
 
 @login_required
 def contact_view(request):
@@ -668,6 +939,74 @@ def planting_selling_suggestions(request):
 @login_required
 def impact_dashboard(request):
     return render(request, 'predictor/impact_dashboard.html')
+
+
+@login_required
+def data_analysis(request):
+    """
+    View to upload a dataset and display key exploratory data analysis plots.
+    """
+    plots = {}
+    df_columns = []
+    error_message = None
+
+    # Per-user cached dataset path
+    cache_dir = os.path.join(settings.MEDIA_ROOT, "data_analysis")
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_path = os.path.join(cache_dir, f"user_{request.user.id}.csv")
+
+    if request.method == "POST" and request.FILES.get("dataset"):
+        uploaded_file = request.FILES["dataset"]
+        try:
+            # Save uploaded file to per-user cache location
+            with open(cache_path, "wb+") as destination:
+                for chunk in uploaded_file.chunks():
+                    destination.write(chunk)
+
+            # Attempt to read as CSV from cached file.
+            df4 = pd.read_csv(cache_path)
+            df_columns = list(df4.columns)
+            plots = _run_data_analysis(df4)
+            if not plots:
+                error_message = (
+                    "Dataset loaded, but required columns were not found for the "
+                    "predefined analyses. Please ensure your file has matching column names."
+                )
+        except Exception as e:
+            error_message = f"Error processing dataset: {str(e)}"
+    elif request.method == "POST":
+        # No new file provided; fall back to cached dataset if available
+        if os.path.exists(cache_path):
+            try:
+                df4 = pd.read_csv(cache_path)
+                df_columns = list(df4.columns)
+                plots = _run_data_analysis(df4)
+                if not plots:
+                    error_message = (
+                        "Cached dataset loaded, but required columns were not found for the "
+                        "predefined analyses. Please ensure your file has matching column names."
+                    )
+            except Exception as e:
+                error_message = f"Error processing cached dataset: {str(e)}"
+        else:
+            error_message = "Please select a CSV file to upload."
+    else:
+        # GET request: if a cached dataset exists, load and analyze it automatically
+        if os.path.exists(cache_path):
+            try:
+                df4 = pd.read_csv(cache_path)
+                df_columns = list(df4.columns)
+                plots = _run_data_analysis(df4)
+            except Exception:
+                # Fail silently here; user can re-upload
+                pass
+
+    context = {
+        "plots": plots,
+        "df_columns": df_columns,
+        "error_message": error_message,
+    }
+    return render(request, "predictor/data_analysis.html", context)
 
 @require_POST
 def set_language(request):
