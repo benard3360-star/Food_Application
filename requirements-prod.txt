@@ -16,3 +16,7 @@ scikit-learn==1.6.1
 pandas==2.2.3
 pytz==2025.1
 pillow==11.1.0
+
+# Add these for data analysis:
+matplotlib==3.9.2
+seaborn==0.13.2
